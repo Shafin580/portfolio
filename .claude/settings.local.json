@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd:map-codebase)",
+      "Skill(gsd:map-codebase:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_run_code",
+      "mcp__browsermcp__browser_navigate",
+      "mcp__browsermcp__browser_get_console_logs",
+      "mcp__browsermcp__browser_screenshot",
+      "mcp__browsermcp__browser_click",
+      "mcp__browsermcp__browser_snapshot",
+      "Bash(du -sh /home/shafin-ahmed/dev/projects/my-portfolio/public/img/*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "code-review-graph",
+    "context7",
+    "Sequential Thinking",
+    "shadcn-ui",
+    "MCP_DOCKER",
+    "browsermcp",
+    "memory",
+    "next-devtools"
+  ]
+}
