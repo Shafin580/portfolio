@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode, type ElementType } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface AnimatedSectionProps {
@@ -8,7 +8,6 @@ interface AnimatedSectionProps {
   className?: string;
   animation?: "fadeInUp" | "slideInLeft" | "scaleIn";
   delay?: 100 | 200 | 300 | 400 | 500 | 600;
-  as?: ElementType;
 }
 
 export function AnimatedSection({
@@ -16,9 +15,8 @@ export function AnimatedSection({
   className,
   animation = "fadeInUp",
   delay,
-  as: Tag = "div",
 }: AnimatedSectionProps) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -39,13 +37,13 @@ export function AnimatedSection({
   }, []);
 
   return (
-    <Tag
+    <div
       ref={ref}
       data-animate={animation}
       data-delay={delay}
       className={cn(className)}
     >
       {children}
-    </Tag>
+    </div>
   );
 }
