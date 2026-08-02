@@ -19,27 +19,41 @@ No test suite is configured.
 ## Architecture
 
 ### Single-page portfolio
-All portfolio content lives in [app/page.tsx](app/page.tsx). Projects and skills are defined as inline constants (`projects` array, `skills` object) at the top of that file — there is no CMS or external data source.
+[app/page.tsx](app/page.tsx) renders the whole site. It is an **async Server Component** — do not add `"use client"` to it.
 
-### App Router layout
-[app/layout.tsx](app/layout.tsx) sets global metadata (title, description, Open Graph, Twitter cards), applies the Inter font, and imports `app/globals.css`. The root URL is `https://shafinwebology.com`.
+**All content lives in [lib/portfolio-data.ts](lib/portfolio-data.ts)**, not in the page: `profile`, `experience`, `projects`, `skills`, `navLinks`, `education`, `certification`, `faqs`. Four consumers read from it (page render, JSON-LD graph, `/llms.txt`, the OG image), so editing content means editing that one file. Never re-inline data into a component.
+
+### Live-link health checks
+[lib/link-status.ts](lib/link-status.ts) pings every project's `live` URL at build time; the Live button and the schema.org `url` only render when the ping succeeds. Failure handling is deliberate — only DNS failure / connection refused / 4xx-5xx count as dead; timeouts **fail open** so a flaky build network cannot strip every Live button. Results cache for 24h via `next: { revalidate }` plus `export const revalidate = 86400` on the page (the two must be kept in sync by hand — Next requires a literal there).
+
+### SEO / AEO / GEO
+- [app/layout.tsx](app/layout.tsx) — `Metadata` + `viewport`. Canonical origin comes from [lib/site.ts](lib/site.ts) (`SITE_URL`, trailing slash stripped); never hardcode a domain.
+- [lib/structured-data.ts](lib/structured-data.ts) — a linked schema.org `@graph` (Person, Organization, WebSite, ProfilePage, ItemList, FAQPage). **Rendered as a plain `<script type="application/ld+json">` in `app/page.tsx`** — do NOT move it to `next/script`, which only injects after hydration and is invisible to crawlers.
+- [app/opengraph-image.tsx](app/opengraph-image.tsx) — dynamic 1200×630 card via `ImageResponse`; [app/twitter-image.tsx](app/twitter-image.tsx) re-exports it. Inter is fetched at build with a fallback to the bundled font.
+- [app/llms.txt/route.ts](app/llms.txt/route.ts) — plain-text brief for LLM crawlers, generated from `lib/portfolio-data.ts`.
+- [app/robots.ts](app/robots.ts) — explicitly allows every named AI crawler.
 
 ### Component library
-ShadCN UI components live in `components/ui/` and are imported via the `@/components/ui/<name>` path alias. The `@/*` alias resolves to the project root (configured in `tsconfig.json`).
+ShadCN UI (new-york style, Tailwind v4 native) lives in `components/ui/`, imported via `@/components/ui/<name>`. Only the 15 components actually used are present — add more with `pnpm dlx shadcn@latest add <name>`. Radix comes from the **unified `radix-ui` package**, not per-component `@radix-ui/react-*`.
+
+Custom components: [components/logo.tsx](components/logo.tsx) (`< S >` mark, inline SVG), [components/brand-icons.tsx](components/brand-icons.tsx) (GitHub/LinkedIn — lucide-react v1 removed brand marks), [components/faq.tsx](components/faq.tsx), [components/animated-section.tsx](components/animated-section.tsx), [components/contact-form.tsx](components/contact-form.tsx), [components/theme-toggle.tsx](components/theme-toggle.tsx).
 
 ### Key utilities
-- `cn()` in [lib/utils.ts](lib/utils.ts) — always use this for merging Tailwind classes conditionally (combines clsx + tailwind-merge)
-- [hooks/use-toast.ts](hooks/use-toast.ts) — custom toast hook (reducer-based); `sonner` is also installed as an alternative
+- `cn()` in [lib/utils.ts](lib/utils.ts) — always use this for merging Tailwind classes conditionally (clsx + tailwind-merge). `tailwind-merge` must stay on v3+ or it mis-merges Tailwind v4 class names.
+- Toasts are **sonner** only. The old `hooks/use-toast.ts` + `ui/toast.tsx` + `ui/toaster.tsx` trio has been deleted.
 
 ### Styling
-- Tailwind CSS 3 with class-based dark mode
-- Design tokens (`background`, `foreground`, `primary`, etc.) are CSS variables defined in [app/globals.css](app/globals.css)
-- `tailwindcss-animate` provides animation utilities
+- **Tailwind CSS v4** — no `tailwind.config.ts`. All theme config lives in [app/globals.css](app/globals.css) via `@theme inline`, with `@custom-variant dark (&:is(.dark *))` for class-based dark mode.
+- Design tokens are **`oklch()` values**, not HSL triplets. Consume them as `var(--border)` directly — wrapping in `hsl()` silently renders nothing (see `.hero-grid`).
+- `tw-animate-css` replaces `tailwindcss-animate`.
+- The hand-written keyframes at the bottom of `globals.css` (hero entrance, float, pulse, `[data-animate]` scroll-reveal driven by `AnimatedSection`) are load-bearing — do not let a codemod or `shadcn add` overwrite them.
 
 ### Notable config
-- [next.config.ts](next.config.ts): `images: { unoptimized: true }` — Next.js Image optimization is disabled; images are served as-is from `public/`
+- [next.config.ts](next.config.ts): image optimization is **on** (AVIF/WebP). Do not re-enable `output: 'export'` — it would break the ISR the link checks depend on.
 - `pnpm start` runs on port **8080**, not the default 3000
-- `NEXT_PUBLIC_SITE_URL` env var is defined in `.env`
+- `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_FORMSPREE_URL` are defined in `.env`
+- ESLint is pinned to **v9**; v10 crashes `eslint-plugin-react` via `eslint-config-next`
+- `tsconfig.json` targets ES2022 (ES5 broke `Set` iteration)
 
 ---
 

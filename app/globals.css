@@ -1,67 +1,104 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221.2 83.2% 53.3%;
-    --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
+@custom-variant dark (&:is(.dark *));
 
-  .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 6%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 217.2 91.2% 59.8%;
-    --chart-1: 217.2 91.2% 59.8%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
+/* ──────────────────────────────────────────────────────────────────────────
+   Design tokens. Values are the OKLCH equivalents of the previous HSL
+   triplets — same palette, new colour space (matches upstream shadcn v4 so
+   future `shadcn add` output stays consistent).
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.1294 0.0273 261.671);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.1294 0.0273 261.671);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.1294 0.0273 261.671);
+  --primary: oklch(0.546 0.2153 262.872);
+  --primary-foreground: oklch(0.9843 0.0017 247.839);
+  --secondary: oklch(0.9671 0.0029 264.542);
+  --secondary-foreground: oklch(0.2103 0.0318 264.652);
+  --muted: oklch(0.9671 0.0029 264.542);
+  --muted-foreground: oklch(0.5513 0.0233 264.365);
+  --accent: oklch(0.9671 0.0029 264.542);
+  --accent-foreground: oklch(0.2103 0.0318 264.652);
+  --destructive: oklch(0.6368 0.2078 25.326);
+  --destructive-foreground: oklch(0.9843 0.0017 247.839);
+  --border: oklch(0.9278 0.0058 264.531);
+  --input: oklch(0.9278 0.0058 264.531);
+  --ring: oklch(0.546 0.2153 262.872);
+  --chart-1: oklch(0.546 0.2153 262.872);
+  --chart-2: oklch(0.6309 0.1013 183.491);
+  --chart-3: oklch(0.3787 0.044 225.539);
+  --chart-4: oklch(0.8336 0.1186 88.146);
+  --chart-5: oklch(0.7834 0.1261 58.749);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(0.1294 0.0273 261.671);
+  --foreground: oklch(0.9843 0.0017 247.839);
+  --card: oklch(0.1493 0.0364 264.235);
+  --card-foreground: oklch(0.9843 0.0017 247.839);
+  --popover: oklch(0.1294 0.0273 261.671);
+  --popover-foreground: oklch(0.9843 0.0017 247.839);
+  --primary: oklch(0.6232 0.1879 259.796);
+  --primary-foreground: oklch(0.2079 0.0399 265.727);
+  --secondary: oklch(0.2784 0.0296 256.848);
+  --secondary-foreground: oklch(0.9843 0.0017 247.839);
+  --muted: oklch(0.2784 0.0296 256.848);
+  --muted-foreground: oklch(0.7137 0.0192 261.333);
+  --accent: oklch(0.2784 0.0296 256.848);
+  --accent-foreground: oklch(0.9843 0.0017 247.839);
+  --destructive: oklch(0.3959 0.1331 25.721);
+  --destructive-foreground: oklch(0.9843 0.0017 247.839);
+  --border: oklch(0.2784 0.0296 256.848);
+  --input: oklch(0.2784 0.0296 256.848);
+  --ring: oklch(0.6232 0.1879 259.796);
+  --chart-1: oklch(0.6232 0.1879 259.796);
+  --chart-2: oklch(0.6983 0.1337 165.463);
+  --chart-3: oklch(0.7232 0.15 60.631);
+  --chart-4: oklch(0.6192 0.2037 312.728);
+  --chart-5: oklch(0.6123 0.2093 6.386);
+}
+
+/* Replaces the old `theme.extend` block from tailwind.config.ts. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -71,9 +108,18 @@
   }
 }
 
+/* Ported from tailwind.config.ts `theme.extend.backgroundImage`. */
+@utility bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+@utility bg-gradient-conic {
+  background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+}
+
 /* ── Hero background dot grid ── */
 .hero-grid {
-  background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+  /* NOTE: tokens are raw colour values now — never wrap these in hsl(). */
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
