@@ -3,6 +3,8 @@ name: learn
 description: Captures and records project knowledge into memory files. Use when discovering reusable patterns, design decisions, gotchas, or when the user says "learn this", "remember this pattern", "save this for later". This is the WRITE side of the knowledge system.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
+skills:
+  - learn
 ---
 
 # /learn — Project Knowledge Capture
@@ -13,8 +15,8 @@ You capture development knowledge and persist it so future conversations stay co
 
 | Location | Purpose |
 |----------|---------|
-| `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/MEMORY.md` | Index of all memories (always loaded) |
-| `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/*.md` | Detailed topic files |
+| `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/MEMORY.md` | Index of all memories (always loaded) |
+| `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md` | Detailed topic files |
 
 ## What to Capture
 
@@ -33,7 +35,7 @@ You capture development knowledge and persist it so future conversations stay co
 
 ### Step 2: Write the Entry
 
-Write to `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/<topic>.md`:
+Write to `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/<topic>.md`:
 
 ```markdown
 ---
@@ -66,7 +68,7 @@ Before writing:
 
 ## Rules
 
-- **NEVER** run any git commands
+- **NEVER** run a state-changing git command (`add`, `commit`, `push`, `checkout`, `reset`, …). Read-only git (`status`, `diff`, `log`, `show`, `blame`) is allowed.
 - Keep `MEMORY.md` index under 200 lines
 - Use absolute dates (YYYY-MM-DD), never relative ("yesterday", "last week")
 - Do NOT record: one-off fixes with no reuse value, standard library usage, anything already in `.claude/skills/`

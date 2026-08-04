@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 const title = `${profile.name} — ${profile.title}`;
 
 const description =
-  "Shafin Ahmed is a Full-Stack Software Engineer with 4+ years of experience building scalable web applications using Next.js, React, TypeScript, Laravel, and Docker. Based in Dhaka, Bangladesh — currently at ARITS Limited, delivering projects like HRMS, Bullwip, Datafast, Better Bangladesh, and calternatives.org.";
+  "Shafin Ahmed is a Full-Stack Software Engineer with 4+ years of experience building scalable web applications using Next.js, React, TypeScript, Laravel, and Docker. Based in Dhaka, Bangladesh — currently at ARITS Limited, delivering projects like HumR, Oporajita, Bullwip, Datafast, and calternatives.org.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

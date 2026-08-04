@@ -24,9 +24,15 @@ export async function GET() {
     const live =
       project.live && linkStatus[project.live] === "alive" ? ` — Live: ${project.live}` : "";
     const repo = project.repo ? ` — Source: ${project.repo}` : "";
+    // Both forms are offered on purpose: the HTML page for anything that
+    // renders, and the plain-text brief for anything that would rather not
+    // parse HTML to reach the same content.
+    const study = project.caseStudy
+      ? ` — Case study: ${SITE_URL}/projects/${project.slug} (plain text: ${SITE_URL}/projects/${project.slug}/llms.txt)`
+      : "";
     return `- **${project.title}** (${project.category}) — ${project.description} Stack: ${project.stacks.join(
       ", ",
-    )}.${live}${repo}`;
+    )}.${live}${repo}${study}`;
   });
 
   const experienceLines = experience.map(

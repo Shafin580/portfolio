@@ -18,25 +18,50 @@ No test suite is configured.
 
 ## Architecture
 
-### Single-page portfolio
-[app/page.tsx](app/page.tsx) renders the whole site. It is an **async Server Component** — do not add `"use client"` to it.
+### Single-page portfolio + case-study pages
+[app/page.tsx](app/page.tsx) renders the homepage. It is an **async Server Component** — do not add `"use client"` to it.
 
-**All content lives in [lib/portfolio-data.ts](lib/portfolio-data.ts)**, not in the page: `profile`, `experience`, `projects`, `skills`, `navLinks`, `education`, `certification`, `faqs`. Four consumers read from it (page render, JSON-LD graph, `/llms.txt`, the OG image), so editing content means editing that one file. Never re-inline data into a component.
+**All content lives in [lib/portfolio-data.ts](lib/portfolio-data.ts)**, not in the page: `profile`, `experience`, `projects`, `skills`, `navLinks`, `education`, `certification`, `faqs`. Six consumers read from it (page render, case-study pages, JSON-LD graph, `/llms.txt`, the OG images, the sitemap), so editing content means editing that one file. Never re-inline data into a component.
+
+### Project case studies — `/projects/<slug>`
+[app/projects/[slug]/page.tsx](app/projects/[slug]/page.tsx) renders a long-form write-up per project: hero + client/timeline/role, screenshot, problem, approach, features, stack, outcomes, prev/next, CTA.
+
+**A project gets a page purely by having a non-null `caseStudy`.** `caseStudyProjects` in `lib/portfolio-data.ts` is the single derived list; `generateStaticParams`, `app/sitemap.ts`, the prev/next nav, and `app/projects/[slug]/opengraph-image.tsx` all read from it. `dynamicParams = false`, so any other slug 404s to [app/projects/[slug]/not-found.tsx](app/projects/[slug]/not-found.tsx). Today: 8 professional projects have one; the 3 personal ones do not.
+
+Chrome is shared with the homepage via [components/site-header.tsx](components/site-header.tsx) (takes `hrefPrefix="/"` off-homepage so `#about` anchors resolve) and [components/site-footer.tsx](components/site-footer.tsx). The card/hero image — including the gradient placeholder used when `image` is null — is [components/project-media.tsx](components/project-media.tsx), shared so the two can never drift.
 
 ### Live-link health checks
 [lib/link-status.ts](lib/link-status.ts) pings every project's `live` URL at build time; the Live button and the schema.org `url` only render when the ping succeeds. Failure handling is deliberate — only DNS failure / connection refused / 4xx-5xx count as dead; timeouts **fail open** so a flaky build network cannot strip every Live button. Results cache for 24h via `next: { revalidate }` plus `export const revalidate = 86400` on the page (the two must be kept in sync by hand — Next requires a literal there).
 
 ### SEO / AEO / GEO
+**The `seo` skill (`.claude/skills/seo/SKILL.md`) is the authority here** — read it before
+changing any of the below. Its `references/json-ld-graph.md` documents both graphs
+node-by-node. Three traps it exists to prevent: a page-level `openGraph` **replaces** the
+parent's rather than merging (so `locale` silently vanishes); structured data must match
+what the page visibly renders; and satori does not reflow, so an over-long OG card is cut
+off without an error.
+
 - [app/layout.tsx](app/layout.tsx) — `Metadata` + `viewport`. Canonical origin comes from [lib/site.ts](lib/site.ts) (`SITE_URL`, trailing slash stripped); never hardcode a domain.
-- [lib/structured-data.ts](lib/structured-data.ts) — a linked schema.org `@graph` (Person, Organization, WebSite, ProfilePage, ItemList, FAQPage). **Rendered as a plain `<script type="application/ld+json">` in `app/page.tsx`** — do NOT move it to `next/script`, which only injects after hydration and is invisible to crawlers.
-- [app/opengraph-image.tsx](app/opengraph-image.tsx) — dynamic 1200×630 card via `ImageResponse`; [app/twitter-image.tsx](app/twitter-image.tsx) re-exports it. Inter is fetched at build with a fallback to the bundled font.
-- [app/llms.txt/route.ts](app/llms.txt/route.ts) — plain-text brief for LLM crawlers, generated from `lib/portfolio-data.ts`.
+- [lib/structured-data.ts](lib/structured-data.ts) — two builders. `buildStructuredData()` is the homepage `@graph` (Person, Organization, WebSite, ProfilePage, ItemList, FAQPage); `buildProjectStructuredData()` is the per-case-study graph (CreativeWork, WebPage, BreadcrumbList). A project's `url` is its own case-study page when it has one, with the client's live site in `sameAs` — still gated on the liveness ping. **Both render as a plain `<script type="application/ld+json">`** — do NOT move either to `next/script`, which only injects after hydration and is invisible to crawlers.
+- [lib/og-card.tsx](lib/og-card.tsx) — the one `ImageResponse` renderer. [app/opengraph-image.tsx](app/opengraph-image.tsx) (root, re-exported by [app/twitter-image.tsx](app/twitter-image.tsx)) and [app/projects/[slug]/opengraph-image.tsx](app/projects/[slug]/opengraph-image.tsx) both call it. Inter is fetched at build with a fallback to the bundled font. 630px is a hard ceiling and satori does not reflow — the body is word-clamped and chips capped at 5, or the pill row falls off the card.
+- [app/llms.txt/route.ts](app/llms.txt/route.ts) — site-wide plain-text brief for LLM crawlers. [app/projects/[slug]/llms.txt/route.ts](app/projects/[slug]/llms.txt/route.ts) — the full case study as plain text, one per project, linked from the page via `alternates.types`. Both generated from `lib/portfolio-data.ts`.
+- [app/sitemap.ts](app/sitemap.ts) — root plus one entry per case study, derived not hand-listed. `lastModified` comes from `caseStudy.updatedDate`, **never `new Date()`** — a lastmod that changes every build is one crawlers learn to ignore.
 - [app/robots.ts](app/robots.ts) — explicitly allows every named AI crawler.
+
+**AEO surfaces** (answer engines): each case study renders a key-takeaways block of
+standalone sentences, a per-project FAQ accordion whose array also builds the `FAQPage`
+node, and `speakable` selectors over the overview and takeaways.
+
+**GEO surfaces** (generative engines): a discrete stat strip, a visible References list
+emitted as schema `citation`, and every named organisation resolved as an `Organization`
+with `sameAs` to its official site. **Every one of those facts is traceable to a verified
+source — nothing in `lib/portfolio-data.ts` is invented, and an empty array is the correct
+output when there is nothing citable.**
 
 ### Component library
 ShadCN UI (new-york style, Tailwind v4 native) lives in `components/ui/`, imported via `@/components/ui/<name>`. Only the 15 components actually used are present — add more with `pnpm dlx shadcn@latest add <name>`. Radix comes from the **unified `radix-ui` package**, not per-component `@radix-ui/react-*`.
 
-Custom components: [components/logo.tsx](components/logo.tsx) (`< S >` mark, inline SVG), [components/brand-icons.tsx](components/brand-icons.tsx) (GitHub/LinkedIn — lucide-react v1 removed brand marks), [components/faq.tsx](components/faq.tsx), [components/animated-section.tsx](components/animated-section.tsx), [components/contact-form.tsx](components/contact-form.tsx), [components/theme-toggle.tsx](components/theme-toggle.tsx).
+Custom components: [components/logo.tsx](components/logo.tsx) (`< S >` mark, inline SVG), [components/brand-icons.tsx](components/brand-icons.tsx) (GitHub/LinkedIn — lucide-react v1 removed brand marks), [components/faq.tsx](components/faq.tsx), [components/animated-section.tsx](components/animated-section.tsx), [components/contact-form.tsx](components/contact-form.tsx), [components/theme-toggle.tsx](components/theme-toggle.tsx), [components/site-header.tsx](components/site-header.tsx), [components/site-footer.tsx](components/site-footer.tsx), [components/project-media.tsx](components/project-media.tsx).
 
 ### Key utilities
 - `cn()` in [lib/utils.ts](lib/utils.ts) — always use this for merging Tailwind classes conditionally (clsx + tailwind-merge). `tailwind-merge` must stay on v3+ or it mis-merges Tailwind v4 class names.
@@ -71,30 +96,41 @@ This project has specialized subagents in `.claude/agents/` and skills in `.clau
 | `qa` | Bug investigation, edge case analysis, validating correctness of changes |
 | `knowledge` | Before any implementation — retrieve established patterns and past decisions |
 | `learn` | After discovering a reusable pattern, gotcha, or architectural decision worth preserving |
+| `security-reviewer` | After touching a route handler, the contact form, a `dangerouslySetInnerHTML`, or any env var |
+| `seo-reviewer` | After touching metadata, JSON-LD, sitemap, robots, an `llms.txt` route, or an OG image |
 | `sync-claude-md` | After significant codebase changes — keeps this file up to date |
 
 ## Skills (auto-loaded into relevant agents)
 
 | Skill | What it enforces |
 |-------|-----------------|
-| `frontend` | ShadCN imports, `cn()` usage, dark mode tokens, no inline styles, `"use client"` rules |
+| `frontend` | ShadCN imports, `cn()` usage, oklch dark-mode tokens, no inline styles, `"use client"` rules |
+| `seo` | **The authority on SEO/AEO/GEO/OG.** Metadata contract, JSON-LD graph shape, citation and entity rules, satori/OG-card constraints |
 | `code-review` | Structured review checklist and report format |
-| `code-review-graph` | When and how to use the MCP knowledge graph instead of Grep/Read |
-| `git` | Never run git commands — user manages all git operations |
+| `git` | No state-changing git — read-only git allowed; user commits |
+| `commit-message-generator` | Composing a commit message (print-only — never commits) |
+| `ui-auditor` | UI consistency, UX heuristics, accessibility; pattern registry at `tasks/ui-patterns.md` |
+| `learn` | Capturing a learning into project memory |
+| `knowledge` | Retrieving past learnings before implementing |
 
-## Knowledge graph (MCP: code-review-graph)
+## Project memory
 
-**Always use the graph before Grep/Glob/Read** for exploration and impact analysis — it's faster and gives structural context (callers, imports, blast radius) that file scanning cannot.
+Persistent knowledge lives in
+`~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/` — `MEMORY.md` is a
+one-line index loaded every session, with one file per memory beside it. The `knowledge`
+skill/agent reads it; the `learn` skill/agent writes it. **This is the only knowledge
+store** — do not create a second one.
 
-| Task | Tool |
-|------|------|
-| Exploring code | `semantic_search_nodes_tool` |
-| Impact of a change | `get_impact_radius_tool` |
-| Reviewing a diff | `detect_changes_tool` + `get_review_context_tool` |
-| Tracing callers/imports | `query_graph_tool` |
-| High-level structure | `get_architecture_overview_tool` |
+Fast corrections go to `tasks/lessons.md`; plans go to `tasks/plans/<slug>.md`.
 
-Fall back to Grep/Glob/Read only when the graph doesn't cover what you need.
+## Delegating to the local model
+
+Before reading any file over ~150 lines, sweeping several files, or starting a bounded
+mechanical subtask, read the global `local-llm` skill
+(`~/.claude/skills/local-llm/SKILL.md`) — it routes that work to the local LM Studio model
+so file bytes never enter Claude's context. Delegation is the default; the exclusion list
+in that skill is closed. Always review the output. Verification for this repo:
+`pnpm lint && pnpm build`.
 
 ---
 
@@ -123,16 +159,23 @@ Fall back to Grep/Glob/Read only when the graph doesn't cover what you need.
 
 # Frontend Conventions
 
-- **Stack:** Next.js 16 (App Router), Tailwind CSS 3, ShadCN UI (Radix UI).
+- **Stack:** Next.js 16 (App Router), React 19, **Tailwind CSS v4**, ShadCN UI (unified `radix-ui` package).
 - **ShadCN UI:** All ShadCN components must reside in `./components/ui`. Import via `@/components/ui/<name>`.
 - **Global Components:** Place shared/reusable components in `./components`.
-- **Styling:** Custom CSS and design token variables go in `./app/globals.css`. Tailwind utility classes only — no inline styles.
+- **Styling:** Theme config and design tokens go in `./app/globals.css` (`@theme inline`, `oklch()` values). Tailwind utility classes only — no inline styles.
 - **Class merging:** Always use `cn()` from `./lib/utils` for conditional Tailwind classes.
-- **Icons:** Use `lucide-react` exclusively.
-- **Types:** Define shared types inline in their component file, or in a dedicated `types.d.ts` at the root if used across multiple files.
-- **Dark mode:** Tailwind class-based. Use CSS variable tokens (`bg-background`, `text-foreground`, etc.) — never hardcoded color values.
+- **Icons:** Use `lucide-react` exclusively (brand marks in `components/brand-icons.tsx`).
+- **Types:** Define shared types inline in their component file; shared content types live in `lib/portfolio-data.ts`.
+- **Dark mode:** Tailwind class-based via `next-themes`. Use CSS variable tokens (`bg-background`, `text-foreground`, etc.) — never hardcoded color values, and never wrap an `oklch()` token in `hsl()`.
 
 # Environment Variables
 
 - Only `.env` is used. Keep it in sync when adding new keys.
-- Current key: `NEXT_PUBLIC_SITE_URL`
+- Current keys: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_FORMSPREE_URL`
+
+# Hooks (`.claude/settings.json`)
+
+- `PreToolUse` on `Edit|Write` blocks edits to any lockfile.
+- `PostToolUse` on `Edit|Write` runs the local `prettier` on `.ts`/`.tsx`/`.css` — a no-op
+  until prettier is installed locally (`pnpm format` currently resolves it via `dlx`).
+- State-changing git commands are denied at the permission layer, not just by convention.

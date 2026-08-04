@@ -10,33 +10,30 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Download,
   ExternalLink,
   Mail,
   MapPin,
   Briefcase,
   GraduationCap,
   Award,
-  Menu,
   Building2,
   Calendar,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { AnimatedSection } from "@/components/animated-section";
 import { ContactForm } from "@/components/contact-form";
 import { GithubIcon, LinkedinIcon } from "@/components/brand-icons";
 import { Faq } from "@/components/faq";
-import { Logo } from "@/components/logo";
+import { ProjectMedia } from "@/components/project-media";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import {
   certification,
   education,
   experience,
-  navLinks,
   personalProjects,
   profile,
   professionalProjects,
@@ -66,87 +63,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildStructuredData(linkStatus)) }}
       />
       <div className="min-h-screen bg-background">
-        {/* ── Navbar ── */}
-        <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16 items-center">
-              <Link href="/" aria-label={`${profile.name} — home`}>
-                <Logo />
-              </Link>
-
-              {/* Desktop nav links */}
-              <div className="hidden md:flex items-center gap-6" role="navigation" aria-label="Sections">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1">
-                <ThemeToggle />
-                <Button variant="ghost" size="icon" asChild>
-                  <Link
-                    href={profile.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${profile.name} on GitHub`}
-                  >
-                    <GithubIcon className="h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="icon" asChild>
-                  <Link
-                    href={profile.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${profile.name} on LinkedIn`}
-                  >
-                    <LinkedinIcon className="h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button size="sm" className="hidden sm:inline-flex" asChild>
-                  <a href={profile.resume} download>
-                    <Download className="mr-2 h-4 w-4" /> Resume
-                  </a>
-                </Button>
-
-                {/* Mobile hamburger */}
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-64">
-                    <SheetTitle className="sr-only">Navigation menu</SheetTitle>
-                    <nav className="flex flex-col gap-5 mt-8 px-4" aria-label="Mobile">
-                      {navLinks.map((link) => (
-                        <a
-                          key={link.href}
-                          href={link.href}
-                          className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {link.label}
-                        </a>
-                      ))}
-                      <Separator />
-                      <Button className="w-full" asChild>
-                        <a href={profile.resume} download>
-                          <Download className="mr-2 h-4 w-4" /> Resume
-                        </a>
-                      </Button>
-                    </nav>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            </div>
-          </div>
-        </nav>
+        <SiteHeader />
 
         <main>
         {/* ── Hero ── */}
@@ -303,8 +220,8 @@ export default async function Home() {
                   I&apos;m a versatile full-stack software engineer with over 4 years of hands-on
                   experience designing and shipping production-grade web applications. At ARITS Limited,
                   I&apos;ve progressed from intern to Software Engineer — leading the frontend
-                  architecture of complex products including an in-house HRMS, a UK rental platform, and
-                  various client-facing websites.
+                  architecture of complex products including HumR (an in-house multi-company HR
+                  platform), a UK rental platform, and various client-facing websites.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   I thrive at the intersection of clean code and great user experience — from architecting
@@ -500,36 +417,24 @@ export default async function Home() {
                           delay={((Math.min((index % 3) * 100 + 100, 400)) as 100 | 200 | 300 | 400)}
                         >
                           <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow py-0 gap-0">
-                            {project.image ? (
-                              <div className="relative h-48 shrink-0">
-                                <Image
-                                  src={project.image}
-                                  alt={`Screenshot of ${project.title} — ${project.stacks
-                                    .slice(0, 3)
-                                    .join(", ")} project by ${profile.name}`}
-                                  fill
-                                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                  className="object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="relative h-48 shrink-0 bg-gradient-to-br from-primary/20 via-primary/10 to-muted flex items-center justify-center">
-                                <div className="text-center px-4">
-                                  <div className="h-12 w-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center mx-auto mb-3">
-                                    <Briefcase className="h-6 w-6 text-primary" />
-                                  </div>
-                                  <p className="text-sm font-semibold text-foreground/80">
-                                    {project.title}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Client / Private Project
-                                  </p>
-                                </div>
-                              </div>
-                            )}
+                            {/* The media strip is a link to the case study when there is
+                                one, so the whole visual is clickable — otherwise it stays
+                                inert markup. */}
+                            <ProjectMedia project={project} />
 
                             <div className="p-6 flex flex-col flex-1">
-                              <h3 className="text-lg font-semibold mb-2">{project.title}</h3>
+                              <h3 className="text-lg font-semibold mb-2">
+                                {project.caseStudy ? (
+                                  <Link
+                                    href={`/projects/${project.slug}`}
+                                    className="hover:text-primary transition-colors"
+                                  >
+                                    {project.title}
+                                  </Link>
+                                ) : (
+                                  project.title
+                                )}
+                              </h3>
                               <p className="text-sm text-muted-foreground mb-4 flex-1">
                                 {project.description}
                               </p>
@@ -540,7 +445,18 @@ export default async function Home() {
                                   </Badge>
                                 ))}
                               </div>
-                              <div className="flex gap-3 mt-auto">
+                              <div className="flex flex-wrap gap-3 mt-auto">
+                                {project.caseStudy && (
+                                  <Button size="sm" asChild>
+                                    <Link
+                                      href={`/projects/${project.slug}`}
+                                      aria-label={`Read the ${project.title} case study`}
+                                    >
+                                      Case study{" "}
+                                      <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                                    </Link>
+                                  </Button>
+                                )}
                                 {/* Only rendered when the build-time ping says the site
                                     is actually reachable — see lib/link-status.ts. */}
                                 {isLive(project.live) && (
@@ -740,21 +656,7 @@ export default async function Home() {
 
         </main>
 
-        {/* ── Footer ── */}
-        <footer className="border-t py-8 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-              <p>© 2026 Shafin Ahmed. All rights reserved.</p>
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                </span>
-                Available for new opportunities
-              </div>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </TooltipProvider>
   );

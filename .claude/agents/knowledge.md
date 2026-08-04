@@ -3,6 +3,8 @@ name: knowledge
 description: Retrieves previously learned project knowledge from memory files. Auto-invoke BEFORE any implementation task to check for established patterns, gotchas, and conventions. This is the READ side of the knowledge system.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+skills:
+  - knowledge
 ---
 
 # /knowledge — Project Knowledge Retrieval
@@ -13,8 +15,8 @@ You search local memory files to retrieve previously captured knowledge — patt
 
 | Priority | Location | Contents |
 |----------|----------|----------|
-| 1 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/MEMORY.md` | High-level index (always in context) |
-| 2 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/*.md` | Detailed topic files |
+| 1 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/MEMORY.md` | High-level index (always in context) |
+| 2 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md` | Detailed topic files |
 | 3 | `.claude/skills/**/*.md` | Coding convention rules |
 
 ## When to Retrieve
@@ -37,7 +39,7 @@ From the user's query or current task, identify:
 
 ### Step 2: Search
 1. **Check MEMORY.md** — Scan for relevant sections
-2. **Search memory topic files** — Grep `~/.claude/projects/-home-shafin-ahmed-dev-projects-my-portfolio/memory/*.md`
+2. **Search memory topic files** — Grep `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md`
 
 ### Step 3: Present Results
 
@@ -64,6 +66,6 @@ Only mention the lookup explicitly if:
 
 ## Rules
 
-- **NEVER** run any git commands
+- **NEVER** run a state-changing git command (`add`, `commit`, `push`, `checkout`, `reset`, …). Read-only git (`status`, `diff`, `log`, `show`, `blame`) is allowed and useful for dating a memory against real history.
 - **NEVER** modify knowledge files — this agent is READ-ONLY (use the learn agent to write)
-- When knowledge conflicts with current code, trust what you observe now
+- When knowledge conflicts with current code, trust what you observe now — a memory records what was true when written

@@ -1,4 +1,52 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm format*)",
+      "Bash(pnpm dlx shadcn@latest add*)",
+      "Bash(python3 ~/.claude/skills/local-llm/scripts/llm.py*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git blame*)"
+    ],
+    "deny": [
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(git reset*)",
+      "Bash(git checkout*)",
+      "Bash(git rebase*)",
+      "Bash(git merge*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *pnpm-lock.yaml|*package-lock.json|*yarn.lock|*bun.lockb) echo 'Blocked: do not edit lockfiles' >&2; exit 2 ;; esac"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.ts|*.tsx|*.css) [ -x \"$CLAUDE_PROJECT_DIR/node_modules/.bin/prettier\" ] && \"$CLAUDE_PROJECT_DIR/node_modules/.bin/prettier\" --write \"$f\" >/dev/null 2>&1 || true ;; esac"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
@@ -14,21 +62,14 @@
   "mcpServers": {
     "exa": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.exa.ai/mcp"
-      ],
+      "args": ["-y", "mcp-remote", "https://mcp.exa.ai/mcp"],
       "env": {
         "EXA_API_KEY": "1a3e1337-f9a9-4324-a0c5-a41133b40bf5"
       }
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
     "browsermcp": {
       "command": "npx",
