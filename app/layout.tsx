@@ -1,114 +1,93 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
-import Script from "next/script";
+import { profile } from "@/lib/portfolio-data";
+import { SITE_URL } from "@/lib/site";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], display: "swap" });
+
+const title = `${profile.name} — ${profile.title}`;
 
 const description =
-  "Shafin Ahmed is a Full-Stack Software Engineer with 4+ years of experience building scalable web applications using Next.js, React, TypeScript, Laravel, and Docker. Based in Dhaka, Bangladesh — currently at ARITS Limited, delivering projects like HRMS, Bullwip, Datafast, Better Bangladesh, and calternatives.org. Expert in frontend, backend, microservices, cloud architecture, and technical SEO.";
+  "Shafin Ahmed is a Full-Stack Software Engineer with 4+ years of experience building scalable web applications using Next.js, React, TypeScript, Laravel, and Docker. Based in Dhaka, Bangladesh — currently at ARITS Limited, delivering projects like HumR, Oporajita, Bullwip, Datafast, and calternatives.org.";
 
 export const metadata: Metadata = {
-  title: "Shafin Ahmed — Full-Stack Software Engineer",
-  description,
-  authors: {
-    name: "Shafin Ahmed",
-    url: "https://shafinwebology.com/",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: title,
+    template: `%s | ${profile.name}`,
   },
-  category: "website",
+  description,
+  applicationName: title,
+  authors: [{ name: profile.name, url: SITE_URL }],
+  creator: profile.name,
+  publisher: profile.name,
+  category: "technology",
+  // Deliberately short. Search engines ignore this tag, and a 35-term list
+  // reads as stuffing to quality classifiers.
   keywords: [
     "Shafin Ahmed",
-    "Shafin Ahmed portfolio",
-    "Software Engineer",
-    "Full-Stack Developer",
-    "Full-Stack Developer Bangladesh",
-    "Software Engineer Dhaka",
+    "Full-Stack Software Engineer",
     "Next.js developer",
     "React developer",
     "TypeScript developer",
     "Laravel developer",
-    "Node.js developer",
-    "NestJS developer",
-    "HRMS developer",
-    "Bullwip platform",
-    "Datafast",
-    "calternatives.org",
-    "Better Bangladesh project",
+    "software engineer Dhaka",
+    "web developer Bangladesh",
     "ARITS Limited",
-    "SheRAA website",
-    "Docker expert",
-    "Turborepo",
-    "Zustand",
-    "Redux developer",
-    "TanStack Query",
-    "Electron developer",
-    "Puppeteer automation",
-    "Headless WordPress",
-    "GraphQL API",
-    "PostgreSQL",
-    "MongoDB",
-    "Elasticsearch",
-    "AWS cloud",
-    "web development Bangladesh",
-    "software engineering projects",
+    "hire full-stack developer",
   ],
-  metadataBase: new URL("https://shafinwebology.com/"),
-  openGraph: {
-    countryName: "Bangladesh",
-    description,
-    locale: "en_US",
-    siteName: "Shafin Ahmed — Full-Stack Software Engineer",
-    title: "Shafin Ahmed — Full-Stack Software Engineer",
-    type: "website",
-    url: "https://shafinwebology.com/",
-    emails: "shafinwork580@gmail.com",
-    images: {
-      url: "https://shafinwebology.com/img/seo-image.png",
-      alt: "Shafin Ahmed — Full-Stack Software Engineer Portfolio",
-      width: 1280,
-      height: 720,
-    },
+  alternates: {
+    canonical: "/",
   },
-  robots: "index, follow",
+  openGraph: {
+    type: "profile",
+    firstName: "Shafin",
+    lastName: "Ahmed",
+    username: "Shafin580",
+    title,
+    description,
+    siteName: title,
+    url: SITE_URL,
+    locale: "en_US",
+    countryName: profile.countryName,
+    emails: profile.email,
+    // Image comes from app/opengraph-image.tsx via the file convention.
+  },
   twitter: {
     card: "summary_large_image",
+    title,
     description,
-    title: "Shafin Ahmed — Full-Stack Software Engineer",
-    images: {
-      url: "https://shafinwebology.com/img/seo-image.png",
-      alt: "Shafin Ahmed — Full-Stack Software Engineer Portfolio",
-      width: 1280,
-      height: 720,
+    // Image comes from app/twitter-image.tsx via the file convention.
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      // Lets answer engines quote at length and show the OG card — the whole
+      // point of the AEO work.
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
     },
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
 };
 
-const personSchema = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: "Shafin Ahmed",
-  jobTitle: "Software Engineer",
-  url: "https://shafinwebology.com",
-  email: "shafinwork580@gmail.com",
-  sameAs: [
-    "https://github.com/Shafin580",
-    "https://www.linkedin.com/in/shafin580/",
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0f1c" },
   ],
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Dhaka",
-    addressCountry: "BD",
-  },
-  worksFor: {
-    "@type": "Organization",
-    name: "ARITS Limited",
-  },
-  alumniOf: {
-    "@type": "CollegeOrUniversity",
-    name: "American International University-Bangladesh",
-  },
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({
@@ -123,12 +102,6 @@ export default function RootLayout({
           {children}
           <Toaster richColors position="top-right" />
         </ThemeProvider>
-        <Script
-          id="person-schema"
-          type="application/ld+json"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
-        />
       </body>
     </html>
   );

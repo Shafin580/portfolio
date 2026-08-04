@@ -27,7 +27,7 @@ import { Send, Loader2 } from "lucide-react";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
+  email: z.email("Please enter a valid email address"),
   company: z.string().optional(),
   projectType: z.string().min(1, "Please select a project type"),
   description: z

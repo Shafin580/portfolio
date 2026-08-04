@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Structured review checklist and report format for this portfolio project. Read when reviewing a diff, auditing a file or module, or validating implementation quality before the user commits — it enforces the frontend and git conventions plus the project invariants that fail silently.
+---
+
 # Code Review Skill
 
 ## Purpose
@@ -49,6 +54,20 @@ Identify what changed:
 ## Security Checklist
 - [ ] No secrets committed (.env values, API keys, tokens)
 - [ ] No XSS vectors (user input rendered with `dangerouslySetInnerHTML` or similar)
+
+---
+
+## SEO / AEO / GEO
+
+If the diff touches `generateMetadata`, `lib/structured-data.ts`, `app/sitemap.ts`,
+`app/robots.ts`, an `llms.txt` route, `lib/og-card.tsx`, an `opengraph-image` file, or
+content in `lib/portfolio-data.ts`:
+
+- [ ] Read the **`seo` skill** — it is the authority, and several things that look like
+      mistakes in that code are documented deliberate decisions
+- [ ] Hand the diff to the **`seo-reviewer` agent** rather than improvising SEO advice here
+- [ ] Spot-check the two that break silently: a page-level `openGraph` restates `locale`,
+      and any `BreadcrumbList` / `FAQPage` matches what the page actually renders
 
 ---
 
