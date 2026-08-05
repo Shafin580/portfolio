@@ -371,131 +371,26 @@ export const projects: Project[] = [
     title: "Bullwip",
     description:
       "Full-stack rental onboarding platform for the UK housing market. Responsive Next.js frontend with TanStack Query over a Laravel API, with cookie-encrypted session management.",
-    image: null,
+    image: "/img/bullwip-image.png",
     stacks: ["Next.js 16", "TypeScript", "Laravel", "PostgreSQL", "Elasticsearch", "Docker"],
-    live: null,
+    live: "https://app.bullwip.co.uk/",
     repo: null,
     category: "professional",
     schemaType: "SoftwareApplication",
-    caseStudy: {
-      client: "UK property management client",
-      year: "2024 – present",
-      role: "Full-Stack Engineer",
-      publishedDate: CASE_STUDY_DATE,
-      updatedDate: CASE_STUDY_DATE,
-      overview:
-        "A property management and rental onboarding SaaS for the UK housing market, built end to end — Next.js frontend, Laravel API, PostgreSQL, and Elasticsearch for search.",
-      takeaways: [
-        "Bullwip models rental onboarding as durable server-side state, so a half-finished application is a first-class record rather than an unsaved browser draft.",
-        "Landlords, agents, and tenants each see a different slice of the same tenancy, kept consistent through TanStack Query cache coordination rather than page reloads.",
-        "Elasticsearch backs property and applicant search at a data size where relational queries had stopped feeling interactive.",
-      ],
-      stats: [
-        { value: "3", label: "parties per tenancy" },
-        { value: "2", label: "data stores: PostgreSQL + Elasticsearch" },
-      ],
-      problem:
-        "Rental onboarding is a long, stateful, document-heavy process shared between landlords, agents, and tenants. Each party sees a different slice, drops out mid-flow, and returns days later expecting to resume exactly where they left off. A form-per-page approach breaks down: state has to survive the session, and every party's view has to stay consistent with the same underlying tenancy.",
-      solution:
-        "The onboarding flow is modelled as durable server-side state rather than client form state, so a half-finished application is a first-class record rather than an unsaved draft. TanStack Query handles cache invalidation across the parties viewing the same tenancy, so an agent's update is reflected without a reload. Sessions are carried in encrypted cookies, and Elasticsearch backs property and applicant search where relational queries were too slow to feel interactive.",
-      features: [
-        "Multi-party rental onboarding flow with resumable, server-persisted progress",
-        "Encrypted cookie session management shared across the app",
-        "Elasticsearch-backed property and applicant search",
-        "Laravel REST API over PostgreSQL, containerised with Docker",
-        "Responsive Next.js frontend with TanStack Query cache coordination",
-      ],
-      outcomes: [
-        "Applications survive drop-off — parties resume mid-flow instead of restarting",
-        "Search stays interactive at a data size where relational queries did not",
-        "Containerised deployment cut release time substantially against the previous manual process",
-      ],
-      faqs: [
-        {
-          question: "What is Bullwip?",
-          answer:
-            "Bullwip is a property management and rental onboarding platform for the UK housing market, built end to end with a Next.js frontend, a Laravel API, PostgreSQL, and Elasticsearch for search.",
-        },
-        {
-          question: "Why is rental onboarding state stored on the server rather than in the browser?",
-          answer:
-            "Onboarding is long, document-heavy, and shared between landlords, agents, and tenants, each of whom drops out mid-flow and returns days later. Holding progress as durable server-side state makes a half-finished application a real record that any party can resume, instead of a browser draft that disappears with the session.",
-        },
-        {
-          question: "Why does Bullwip use Elasticsearch alongside PostgreSQL?",
-          answer:
-            "PostgreSQL holds the tenancy data, but property and applicant search stopped feeling interactive at the data sizes involved. Elasticsearch backs those search paths specifically, leaving the relational store to do what it is good at.",
-        },
-      ],
-      sources: [],
-      entities: [ARITS],
-      externalCaseStudy: null,
-    },
+    caseStudy: null,
   },
   {
     slug: "datafast",
     title: "Datafast",
     description:
       "Full-stack data management desktop application wrapped with Electron. Web automation via Puppeteer, a Next.js frontend, and a Laravel backend — built entirely from scratch.",
-    image: null,
+    image: "/img/datafast-image.png",
     stacks: ["Next.js 14", "TypeScript", "Laravel", "MySQL", "Electron", "Puppeteer", "Docker"],
     live: null,
     repo: null,
     category: "professional",
     schemaType: "SoftwareApplication",
-    caseStudy: {
-      client: null,
-      year: "2023 – 2024",
-      role: "Full-Stack Engineer",
-      publishedDate: CASE_STUDY_DATE,
-      updatedDate: CASE_STUDY_DATE,
-      overview:
-        "A desktop data management tool that collects, normalises, and manages records from sources that only exist as web pages — shipped as an Electron app so it runs on an operator's machine with their own credentials.",
-      takeaways: [
-        "Datafast runs Puppeteer automation locally inside an Electron shell, under the operator's own browser session, because the target sources were session-bound and rejected datacentre traffic.",
-        "Collected records flow into a Laravel API over MySQL for normalisation and deduplication, which keeps the desktop client a thin driver and leaves the data somewhere auditable.",
-        "The application was built from scratch end to end — desktop shell, Next.js frontend, Laravel API, and schema.",
-      ],
-      stats: [
-        { value: "4", label: "layers built from scratch" },
-      ],
-      problem:
-        "The data the team needed was locked in third-party web interfaces with no API. Doing it by hand was slow and error-prone; doing it from a server was worse, because the sources were session-bound and treated datacentre traffic as hostile. The work had to run where the operator already was, on their machine, under their session.",
-      solution:
-        "Electron wraps a Next.js frontend and drives Puppeteer locally, so automation runs in the operator's own browser context rather than from a server. Collected records flow into a Laravel API over MySQL where they are normalised and deduplicated, which keeps the desktop client a thin driver and leaves the data model somewhere it can be queried and audited. Docker keeps the backend reproducible across environments.",
-      features: [
-        "Electron desktop shell around a Next.js frontend",
-        "Puppeteer automation running locally, under the operator's own session",
-        "Laravel + MySQL backend for normalisation, deduplication, and querying",
-        "Data management UI for reviewing, correcting, and exporting collected records",
-        "Dockerised backend for reproducible environments",
-      ],
-      outcomes: [
-        "Replaced a manual collection process with a repeatable, reviewable one",
-        "Automation runs under operator sessions, avoiding the blocks server-side collection hit",
-        "Built from scratch end to end — desktop shell, frontend, API, and schema",
-      ],
-      faqs: [
-        {
-          question: "What is Datafast?",
-          answer:
-            "Datafast is a desktop data management application that collects, normalises, and manages records from third-party sources that exist only as web pages. It ships as an Electron app wrapping a Next.js frontend, with a Laravel and MySQL backend.",
-        },
-        {
-          question: "Why is Datafast a desktop app rather than a server-side job?",
-          answer:
-            "The source systems were session-bound and treated datacentre traffic as hostile, so server-side collection was blocked. Running inside Electron on the operator's own machine means the automation executes under their existing browser session, which is the only context the sources accept.",
-        },
-        {
-          question: "What does the backend do if the automation runs locally?",
-          answer:
-            "The Laravel and MySQL backend normalises and deduplicates everything the desktop client collects. Keeping that server-side leaves the desktop app a thin driver and puts the data somewhere it can be queried, corrected, and audited.",
-        },
-      ],
-      sources: [],
-      entities: [ARITS],
-      externalCaseStudy: null,
-    },
+    caseStudy: null,
   },
   {
     slug: "shaathi",
@@ -592,7 +487,7 @@ export const projects: Project[] = [
     schemaType: "WebSite",
     caseStudy: {
       client: "Centre for Alternatives",
-      year: "2023",
+      year: "2025",
       role: "Frontend Engineer",
       publishedDate: CASE_STUDY_DATE,
       updatedDate: CASE_STUDY_DATE,
@@ -669,7 +564,7 @@ export const projects: Project[] = [
     schemaType: "WebSite",
     caseStudy: {
       client: "ARITS Limited",
-      year: "2023 – 2025",
+      year: "2024",
       role: "Frontend Engineer",
       publishedDate: CASE_STUDY_DATE,
       updatedDate: CASE_STUDY_DATE,
