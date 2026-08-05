@@ -16,11 +16,24 @@
 %   * Do NOT put contact details in a header/footer -- parsers skip those.
 %   * Do NOT use tabular/multicol for layout. Parsers read one text stream;
 %     \hbox to\linewidth keeps a title and its date on the SAME output line.
+%   * The headshot is an [overlay] textblock*, NOT inline \includegraphics.
+%     Overlay content consumes zero flow height, so it cannot push the body
+%     down or spill the document onto a third page. Keep it that way.
 %   * After every compile run: pdftotext "Shafin Ahmed - Resume.pdf" - | head
 %     and confirm the name, headings and URLs come out intact.
 %------------------------
 
 \documentclass[letterpaper,11pt]{article}
+
+%----------BUILD SWITCH----------
+% \phototrue  -> headshot in the top-left (Bangladesh, most of Europe, the
+%                Middle East and much of Asia, where a photo is expected)
+% \photofalse -> no headshot (US / UK / Canada / Australia and most remote
+%                roles, where employers routinely screen out resumes with
+%                photos to limit discrimination exposure)
+% Flip the line below, recompile, keep both PDFs.
+\newif\ifphoto
+\photofalse
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -29,6 +42,10 @@
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
 \usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage[absolute,overlay]{textpos}
+\setlength{\TPHorizModule}{1in}
+\setlength{\TPVertModule}{1in}
 
 % Single sans-serif family. The previous version loaded FiraSans, roboto,
 % noto-sans and sourcesanspro together; only the last one ever took effect.
@@ -101,6 +118,19 @@
 %-------------------------------------------
 %%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+
+%----------HEADSHOT----------
+% [overlay] means this block takes ZERO vertical space in the text flow, so
+% nothing below it moves. Doubled braces around the basename are the graphicx
+% idiom for a filename containing a space.
+\ifphoto
+% x=0.5in aligns the photo's left edge with the text column. The y offset and
+% width are tuned so the bottom edge clears the "Professional Summary" rule --
+% at width=1in it collided with the heading. Re-check visually if either moves.
+\begin{textblock*}{0.95in}(0.5in,0.35in)
+	\includegraphics[width=0.95in]{{Shafin Ahmed}.png}
+\end{textblock*}
+\fi
 
 %----------HEADING----------
 % Plain text only. Every value is readable without following a hyperlink.
