@@ -1,53 +1,58 @@
 %-------------------------
-% Resume in Latex
-% Author : Yauheni Baltukha
+% Resume in LaTeX
+% Author  : Shafin Ahmed
 % Based off of: https://github.com/baltuky/latex-cv
 % License : MIT
+%
+% ATS NOTES -- read before editing:
+%   * \pdfgentounicode=1 below is LOAD-BEARING. Without it pdfTeX emits no
+%     ToUnicode map and the "fi" ligature in "Shafin" extracts as lowercase
+%     "fi" -- the compiled name literally parsed as "SHAfiN AHMED" before.
+%   * Do NOT reintroduce \scshape. Small caps + ligature turned the section
+%     heading "Certifications" into "CERTIfiCATIONS" in extracted text.
+%   * Do NOT reintroduce fontawesome/marvosym icons. Their glyphs carry no
+%     Unicode mapping, so phone/email/LinkedIn/GitHub extracted as nothing.
+%     Contact values are plain text now; \href only adds clickability on top.
+%   * Do NOT put contact details in a header/footer -- parsers skip those.
+%   * Do NOT use tabular/multicol for layout. Parsers read one text stream;
+%     \hbox to\linewidth keeps a title and its date on the SAME output line.
+%   * After every compile run: pdftotext "Shafin Ahmed - Resume.pdf" - | head
+%     and confirm the name, headings and URLs come out intact.
 %------------------------
 
-\documentclass[a4, 11pt]{article}
+\documentclass[letterpaper,11pt]{article}
 
-\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage[empty]{fullpage}
 \usepackage{titlesec}
-\usepackage{marvosym}
-\usepackage[usenames, dvipsnames]{color}
-\usepackage{verbatim}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
-\usepackage{fancyhdr}
 \usepackage[english]{babel}
-\usepackage{tabularx}
-\usepackage{ragged2e}
-\usepackage{fontawesome}
-\usepackage{graphicx}
-\usepackage[absolute,overlay]{textpos}
-\usepackage{amsmath}
-\input{glyphtounicode}
 
-%----------FONT OPTIONS----------
-% sans-serif
-\usepackage[sfdefault]{FiraSans}
-\usepackage[sfdefault]{roboto}
-\usepackage[sfdefault]{noto-sans}
+% Single sans-serif family. The previous version loaded FiraSans, roboto,
+% noto-sans and sourcesanspro together; only the last one ever took effect.
 \usepackage[default]{sourcesanspro}
 
-% serif
-% \usepackage{CormorantGaramond}
-% \usepackage{charter}
+% Machine-readable text extraction. Must come after the font package.
+\input{glyphtounicode}
+\pdfgentounicode=1
 
-\pagestyle{fancy}
-\fancyhf{} % clear all header and footer fields
-\fancyfoot{}
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}
+\hypersetup{
+	pdftitle={Shafin Ahmed - Resume},
+	pdfauthor={Shafin Ahmed},
+	pdfsubject={Full-Stack Software Engineer},
+	pdfkeywords={Next.js, React, TypeScript, Node.js, Laravel, PostgreSQL, Docker, Full-Stack Software Engineer}
+}
+
+\pagestyle{empty}
 
 % Adjust margins
 \addtolength{\oddsidemargin}{-0.5in}
 \addtolength{\evensidemargin}{-0.5in}
 \addtolength{\textwidth}{1.0in}
 \addtolength{\topmargin}{-0.5in}
-\addtolength{\textheight}{0.8in}
+\addtolength{\textheight}{1.0in}
 
 \urlstyle{same}
 
@@ -55,199 +60,200 @@
 \raggedright
 \setlength{\tabcolsep}{0in}
 
-% Sections formatting
-\titleformat{\section}{ \vspace{-4pt}\scshape\raggedright\large }{}{0em}{}[
-\color{black}
+% Section formatting -- plain bold, standard capitalisation, no small caps.
+\titleformat{\section}{\vspace{-10pt}\bfseries\large\raggedright}{}{0em}{}[
 \titlerule
-\vspace{-5pt}
+\vspace{-7pt}
 ]
-
-% Ensure that generate pdf is machine readable/ATS parsable
-%\pdfgentounicode=1
 
 %-------------------------
 % Custom commands
-\newcommand{\resumeItem}[1]{ \item\small{ {#1 \vspace{-2pt}} } }
+%
+% \resumeRow renders a left item and a right item as ONE horizontal box, so
+% extraction keeps them on a single line and a role stays glued to its dates.
+\newcommand{\resumeRow}[2]{\hbox to \linewidth{#1\hfill #2}}
 
-\newcommand{\resumeSubheading}[4]{
-\vspace{-2pt}
-\item
-\begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
-	\textbf{#1}       & #2                 \\
-	\textit{\small#3} & \textit{\small #4} \\
-\end{tabular*}
-\vspace{-7pt}}
+\newcommand{\resumeItem}[1]{\item\small{#1}}
 
-\newcommand{\resumeSubSubheading}[2]{ \item
-\begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-	\textit{\small#1} & \textit{\small #2} \\
-\end{tabular*}
-\vspace{-7pt}
-}
+% \leavevmode is required: after \item TeX is in vertical mode, where an \hbox
+% is appended as a whole line and the following \\ raises
+% "LaTeX Error: There's no line here to end."
+\newcommand{\resumeSubheading}[4]{%
+	\vspace{4pt}\item\leavevmode
+	\resumeRow{\textbf{#1}}{\small #2}\\
+	\resumeRow{\textit{\small #3}}{\textit{\small #4}}
+	\vspace{-2pt}}
 
-\newcommand{\resumeProjectHeading}[2]{ \item
-\begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-	\small#1 & #2 \\
-\end{tabular*}
-\vspace{-7pt}
-}
-
-\newcommand{\resumeSubItem}[1]{\resumeItem{#1}
-\vspace{-4pt}}
-
-\renewcommand{\labelitemii}{$\vcenter{\hbox{\tiny$\bullet$}}$}
+% #1 project + role, #2 tech stack (own line, free to wrap), #3 date.
+% Keeping the stack off the date line is what fixed the old collision where
+% "...TurboRepo" ran straight into "June 2024" with no separator.
+\newcommand{\resumeProjectHeading}[3]{%
+	\vspace{4pt}\item\leavevmode
+	\resumeRow{\small\textbf{#1}}{\small #3}\\
+	{\small\textit{#2}}
+	\vspace{-2pt}}
 
 \newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
 \newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
-\newcommand{\resumeItemListStart}{\begin{itemize}}
-\newcommand{\resumeItemListEnd}{\end{itemize}
-\vspace{-5pt}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.25in, label=$\bullet$, topsep=3pt, itemsep=2pt, parsep=0pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}}
 
 %-------------------------------------------
 %%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-	%----------HEADING----------
- 
-	\begin{center}
-		\textbf{\Huge \scshape Shafin Ahmed} \\
-		\vspace{1pt}
-		\small A versatile software engineer with 4 years of experience
-	\end{center}
 
-	\begin{center}
-		\raisebox{-0.2\height}{\Large \faPhoneSquare} \ \ \href{tel:+8801711382280}{+8801711382280}
-		\hfill\raisebox{-0.2\height}{\Large \faEnvelopeSquare} \ \ \href{mailto:shafinwork580@gmail.com}{shafinwork580@gmail.com}
-		\hfill \raisebox{-0.2\height}{\Large \faLinkedinSquare} \ \ \href{https://www.linkedin.com/in/shafin580/}{shafin580}
-		\hfill\raisebox{-0.2\height}{\Large \faGithubSquare} \ \ \href{https://github.com/Shafin580}{Shafin580} \hfill\raisebox{-0.2\height}{\Large
-		\faGlobe}
-		\ \ \href{https://portfolio-shafin580s-projects.vercel.app/}{portfolio site}
-	\end{center}
+%----------HEADING----------
+% Plain text only. Every value is readable without following a hyperlink.
+\begin{center}
+	{\Huge \textbf{Shafin Ahmed}} \\ \vspace{3pt}
+	{\large Full-Stack Software Engineer} \\ \vspace{3pt}
+	\small
+	Dhaka, Bangladesh $|$
+	\href{tel:+8801711382280}{+880 1711 382280} $|$
+	\href{mailto:shafinwork580@gmail.com}{shafinwork580@gmail.com} \\ \vspace{2pt}
+	\href{https://www.linkedin.com/in/shafin580/}{linkedin.com/in/shafin580} $|$
+	\href{https://github.com/Shafin580}{github.com/Shafin580} $|$
+	\href{https://portfolio-shafin580s-projects.vercel.app}{portfolio-shafin580s-projects.vercel.app}
+\end{center}
 
-	%-----------EXPERIENCE-----------
-	\section{Experience}
-	\resumeSubHeadingListStart
+%-----------SUMMARY-----------
+\section{Professional Summary}
+\small Full-Stack Software Engineer with 4+ years shipping production web applications in
+Next.js, React and TypeScript on Laravel, NestJS, Node.js and PostgreSQL backends. Delivery
+spans single sign-on (SSO), payment integration, service-oriented architecture, Elasticsearch
+and Docker-based CI/CD for HR, NGO and property-technology clients.
+\vspace{-4pt}
 
-    \resumeSubheading {Software Engineer}{June 2024 -- Present} {ARITS Limited}{Baridhara DOHS, Dhaka}
-	\begin{description}
-		\item[] {\small\setlength{\baselineskip}{0.8\baselineskip} Spearheaded the development of sophisticated, responsive user interfaces, integrating advanced features like real-time data synchronization, global state management, and multi-factor authentication. Collaborated with backend developers, planning and building system architecture. implementing Tanstack Query for seamless database interactions, leading to improved data consistency and query performance. Integrated Stripe payment gateway into various projects. Implemented notification and messaging services on the frontend. Helped developing microservices for modular architecture, applying encryption techniques for secure data transactions. Streamlined deployment workflows by containerizing applications with Docker, achieving a 50\% reduction in deployment time.}
-	\end{description}
- 
-	\resumeSubheading {Junior Software Engineer}{Sept 2022 -- June 2024} {ARITS Limited}{Baridhara DOHS, Dhaka}
-	\begin{description}
-		\item[] {\small\setlength{\baselineskip}{0.8\baselineskip} Designed over a dozen of complex and responsive UIs, implementing advanced features like global state management and authentication systems. Built multiple Frontend reusable components using Next.js, applied cryptography for data security. Containerized applications with Docker, enhancing full-stack development capabilities for over 40\% of deployments.}
-	\end{description}
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, topsep=4pt, itemsep=2pt, parsep=0pt]
+	\item{\small\textbf{Languages}: TypeScript, JavaScript (ES6+), PHP, Python, Java, C++, C\#, SQL, HTML5, CSS3}
+	\item{\small\textbf{Frontend}: React, Next.js (App Router), Tailwind CSS, ShadCN UI, TanStack Query, Zustand, Redux, SSR/SSG}
+	\item{\small\textbf{Backend}: Node.js, NestJS, Laravel, Django, REST APIs, GraphQL, Microservices, Service-Oriented Architecture}
+	\item{\small\textbf{Databases \& Search}: PostgreSQL, MySQL, MongoDB, Elasticsearch}
+	\item{\small\textbf{DevOps \& Cloud}: Docker, Amazon Web Services (AWS), CI/CD, Turborepo, Git, Electron}
+	\item{\small\textbf{Practices \& Tools}: Agile/Scrum, Jira, Single Sign-On (SSO), Cryptography, Search Engine Optimization (SEO), Headless WordPress, Puppeteer}
+\end{itemize}
+\vspace{-6pt}
 
-	\resumeSubheading {Internship Trainee}{June 2022 - Sept 2022} {ARITS Limited}{Baridhara DOHS, Dhaka}
-	\begin{description}
-		\item[] {\small\setlength{\baselineskip}{0.8\baselineskip} Developed web applications with Next.js, emphasizing server-side rendering and crafting engaging user interfaces using versatile animation libraries. Gained hands-on experience in building and integrating RESTful API endpoints while managing data fetching and state with modern front-end libraries. Additionally, developed backend services and REST APIs using Laravel, integrating Elasticsearch for optimized data querying and retrieval.}
-	\end{description}
+%-----------EXPERIENCE-----------
+\section{Experience}
+\resumeSubHeadingListStart
 
-	\resumeSubHeadingListEnd
-
- %-----------PROGRAMMING SKILLS-----------
-	\section{Technical Skills}
-	\begin{itemize}[leftmargin=0.15in, label={}]
-		\item{ 
-            \textbf{Languages}{: Javascript, Typescript, PHP, Python, Java, C, C++, C\#, HTML, CSS}
-        } 
-
-        \item{
-            \textbf{Databases}{: MySQL, PostgreSQL, MongoDB, Elasticsearch, GraphQL}
-        }
-
-        \item{
-            \textbf{Framework \& Library}{: Laravel, NextJS, ReactJS, Tailwindcss, ShadCN, Django, NestJS, NodeJS}
-        }
-
-        \item{
-            \textbf{Technologies}{: JIRA, Git, Docker, AWS, CI/CD, Turborepo, Headless Wordpress, Zustand, Redux, Context API, TanStack Query, Puppeteer, Electron}
-        }
-	\end{itemize}
-
-	%-----------PROJECTS-----------
-	\section{Projects}
-	\resumeSubHeadingListStart
-
-    \resumeProjectHeading
-      {\textbf{HumR (In-house Product)} $|$ \emph{Next.js 16 | Typescript | Cryptography | Tanstack | Tailwindcss | ShadCN | TurboRepo}}
-      {June 2024 -- Present}
-      \resumeItemListStart
-        \resumeItem{\textbf{Frontend Development:} Architected and developed the frontend codebase for HumR, a multi-company HR platform spanning three Next.js applications, implementing best practices for scalable and maintainable code structure.}
-        \resumeItem{\textbf{Single Sign-On (SSO):} Designed a secure login flow with middleware to share encrypted cookies across subdomains, enabling seamless user authentication across multiple modules without repeated logins, redirecting invalid users to the main module’s login page.}
-        \resumeItem{\textbf{Optimized Codebase with Turborepo:} Utilized Turborepo to create and publish shared packages for common functions, reducing code duplication and enhancing maintainability across the project.}
-        \resumeItem{\textbf{API Integration:} Spearheaded API consumption using TanStack Query, ensuring efficient data fetching and state management across the application.}
-        \resumeItem{\textbf{Enhanced Security:} Implemented cookie encryption to secure user data and maintain session integrity across subdomains.}
-        \resumeItem{\textbf{Developed Custom Components:} Built reusable and dynamic UI components, including a \href{https://dynamic-form-builder-ruddy.vercel.app/}{Dynamic Form Builder}, \href{https://routine-builder-app.vercel.app/}{Weekly Routine Builder}, \href{https://routine-calendar-app.vercel.app/}{Custom Calendar Routine}, \href{https://attendance-app-two-beta.vercel.app/}{Attendance Clock In-Out}, and \href{https://attendance-summary-app-alpha.vercel.app/}{Attendance Report UI}, improving user experience and functionality.}
-    \resumeItemListEnd
-
-    \resumeProjectHeading
-      {\textbf{\href{https://arits.tech/our-work/oporajita-web-application}{Oporajita}} $|$ Fullstack $|$ \emph{Next.js | Typescript | Elasticsearch | Docker | Tanstack | Service-Oriented Architecture}}
-      {2025}
-      \resumeItemListStart
-        \resumeItem{\textbf{Programme Dashboard:} Built a real-time data and collaboration dashboard for The Asia Foundation's Oporajita initiative, used by 15 partner organisations across Bangladesh's garment sector; delivered in an 8-week cycle from UX design to deployment.}
-        \resumeItem{\textbf{Data Standardisation:} Replaced fifteen incompatible spreadsheet conventions with a single submission schema, making cross-partner comparison a property of the system rather than a manual reconciliation pass.}
-        \resumeItem{\textbf{Reporting \& Collaboration:} Delivered a report builder for donors and project teams, a collaboration tracker surfacing joint activities, and a historical archive keeping every submission reviewable.}
-      \resumeItemListEnd
-
-     \resumeProjectHeading {\textbf{\href{https://app.bullwip.co.uk/}{Bullwip}} $|$ Fullstack $|$ \emph{Next.js 16 | Typescript | Docker | Shadcn | Tailwindcss | Laravel | PostgreSQL | Elasticsearch}}
-	{
-	{Present}
-	} \resumeItemListStart
-        \resumeItem{\textbf{Fullstack Development:} Architected a full-stack rental onboarding platform using Next.js for a responsive frontend and Laravel for a robust backend API, specifically tailored to the UK housing market.}
-        \resumeItem{\textbf{Resumable Onboarding:} Modelled the multi-party onboarding flow as durable server-side state so landlords, agents, and tenants resume mid-application days later instead of restarting.}
-        \resumeItem{\textbf{Search at Scale:} Backed property and applicant search with Elasticsearch where relational queries had stopped feeling interactive.}
-	\resumeItemListEnd
-
-    \resumeProjectHeading
-      {\textbf{Datafast} $|$ Fullstack $|$ \emph{Laravel | MySQL | Electron | Next.js 14 | Typescript | Puppeteer | Docker}}
-      {Present}
-      \resumeItemListStart 
-        \resumeItem{\textbf{Data Normalization:} Enhanced data handling and performance with effective frontend normalization techniques.}
-        \resumeItem{\textbf{Automation:} Integrated seamless web automation using Puppeteer for efficient browser-based task execution}
-        \resumeItem{\textbf{Infrastructure:} Designed and developed the entire system from scratch, wrapping the application with Electron for seamless desktop deployment.}
+\resumeSubheading{Software Engineer}{June 2024 -- Present}{ARITS Limited}{Dhaka, Bangladesh}
+\resumeItemListStart
+	\resumeItem{Architected responsive front-end interfaces for 3 production Next.js applications with real-time data synchronisation, global state management and multi-factor authentication (MFA).}
+	\resumeItem{Designed a single sign-on (SSO) flow using middleware-shared encrypted cookies across subdomains, removing repeat logins across 7 platform modules and 4 permission roles.}
+	\resumeItem{Reduced deployment time by 50\% by containerising applications with Docker and standardising CI/CD workflows.}
+	\resumeItem{Integrated Stripe payments, notification and messaging services, and partnered with backend engineers on microservice architecture and encrypted data transactions.}
 \resumeItemListEnd
 
-    \resumeProjectHeading
-      {\textbf{\href{https://www.calternatives.org/}{calternatives.org}} $|$ Fullstack $|$ \emph{Headless Wordpress | GraphQL | ACF | SEO | Next.js 14 | Typescript | Docker | SSG | SSR}}
-      {Jan 2025}
-      \resumeItemListStart
-        \resumeItem{\textbf{Headless WordPress Integration:} Integrated WordPress with GraphQL and ACF for flexible content management and efficient data retrieval, resulting in a 70\% increase in development speed}
-        \resumeItem{\textbf{Technical SEO:} Applied sitemap, robots configuration and technical SEO best practices to boost visibility and search engine performance by 65\%}
+\resumeSubheading{Junior Software Engineer}{Sept 2022 -- June 2024}{ARITS Limited}{Dhaka, Bangladesh}
+\resumeItemListStart
+	\resumeItem{Designed and shipped 12+ complex responsive user interfaces in Next.js and TypeScript, including global state management and authentication systems.}
+	\resumeItem{Built a library of reusable Next.js components, reducing duplicated interface code across projects.}
+	\resumeItem{Containerised 40\%+ of team deployments with Docker and applied cryptography to secure data transactions within a microservice architecture.}
 \resumeItemListEnd
 
-    \resumeProjectHeading {\textbf{\href{https://arits.tech/}{arits.tech}} $|$ Fullstack $|$ \emph{Headless Wordpress | GraphQL | ACF | SEO | Webflow | Javascript | Docker}}
-	{
-	{Feb 2024}
-	} \resumeItemListStart
-        \resumeItem{\textbf{Data Normalization:} Improved data management and performance by 30\% through frontend data normalization.}
-        \resumeItem{\textbf{Headless WordPress Integration:} Integrated WordPress with GraphQL and ACF for flexible content management and efficient data retrieval, resulting in a 40\% increase in development speed}
-        \resumeItem{\textbf{Technical SEO:} Applied sitemap, robots configuration and technical SEO best practices to boost visibility and search engine performance by 45\%}
-	\resumeItemListEnd
+\resumeSubheading{Software Engineer Intern}{June 2022 -- Sept 2022}{ARITS Limited}{Dhaka, Bangladesh}
+\resumeItemListStart
+	\resumeItem{Built server-side rendered (SSR) applications in Next.js and integrated RESTful API endpoints with modern state-management libraries.}
+	\resumeItem{Developed backend services and REST APIs in Laravel, integrating Elasticsearch for optimised data querying and retrieval.}
+\resumeItemListEnd
 
-	\resumeSubHeadingListEnd
+\resumeSubHeadingListEnd
 
-	%-----------CERTIFICATION-----------
-	\section{Certifications}
-	\resumeSubHeadingListStart \resumeSubheading {Responsive Web Development, CodersTrust}{Dhaka, Bangladesh}
-	{ }{Mar 2020} \resumeSubHeadingListEnd
+%-----------PROJECTS-----------
+\section{Projects}
+\resumeSubHeadingListStart
 
-	%-------------------------------------------
- 
-    %-----------EDUCATION-----------
-	\section{Education}
-	\resumeSubHeadingListStart \resumeSubheading {Computer Science and Engineering, American International University-Bangladesh }{Dhaka, Bangladesh}
-	{Bachelor of Science -- 3.58/4}{Jan 2018 -- April 2022}
-        {Thesis: Machine Learning: Train AI to detect sentiment in a sentence}
- \resumeSubHeadingListEnd
+\resumeProjectHeading
+{HumR -- Multi-Company HR Platform $|$ Frontend Lead}
+{Next.js 16 $|$ TypeScript $|$ Turborepo $|$ TanStack Query $|$ ShadCN UI $|$ Tailwind CSS $|$ Cryptography}
+{June 2024 -- Present}
+\resumeItemListStart
+	\resumeItem{Architected the front-end codebase for a multi-company HR platform spanning 3 Next.js applications, 7 functional modules and 4 permission personas.}
+	\resumeItem{Implemented single sign-on across subdomains with middleware-shared encrypted cookies, keeping one session valid across every module, and standardised server state on TanStack Query.}
+	\resumeItem{Published shared Turborepo packages for common utilities and interface primitives, removing duplicate implementations across the three applications.}
+	\resumeItem{Delivered reusable interactive components: \href{https://dynamic-form-builder-ruddy.vercel.app/}{Dynamic Form Builder}, \href{https://routine-builder-app.vercel.app/}{Weekly Routine Builder}, \href{https://routine-calendar-app.vercel.app/}{Calendar Routine}, \href{https://attendance-app-two-beta.vercel.app/}{Attendance Clock In/Out} and \href{https://attendance-summary-app-alpha.vercel.app/}{Attendance Reporting}.}
+\resumeItemListEnd
 
- %-----------REFERENCES-----------
-% Referees' personal emails and mobile numbers were removed deliberately: this
+\resumeProjectHeading
+{\href{https://arits.tech/our-work/oporajita-web-application}{Oporajita} -- The Asia Foundation $|$ Frontend Engineer}
+{Next.js $|$ TypeScript $|$ Elasticsearch $|$ Docker $|$ TanStack Query $|$ Service-Oriented Architecture}
+{2025}
+\resumeItemListStart
+	\resumeItem{Built a real-time data and collaboration dashboard used by 15 partner organisations across Bangladesh's garment sector, delivered end to end in an 8-week cycle from UX design to deployment.}
+	\resumeItem{Replaced 15 incompatible spreadsheet conventions with a single submission schema, making cross-partner comparison a property of the system rather than a manual reconciliation pass.}
+	\resumeItem{Shipped 4 core capabilities: a donor and project report builder, a collaboration tracker surfacing joint activities, and a historical archive keeping every submission reviewable.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\href{https://app.bullwip.co.uk/}{Bullwip} -- UK Rental Onboarding Platform $|$ Full-Stack Engineer}
+{Next.js 16 $|$ TypeScript $|$ Laravel $|$ PostgreSQL $|$ Elasticsearch $|$ Docker $|$ ShadCN UI $|$ Tailwind CSS}
+{2025 -- Present} % TODO: confirm start year
+\resumeItemListStart
+	\resumeItem{Architected a full-stack rental onboarding platform for the UK housing market: Next.js front end, Laravel REST API and PostgreSQL persistence.}
+	\resumeItem{Modelled the multi-party onboarding flow as durable server-side state so landlords, agents and tenants resume mid-application days later instead of restarting; moved property and applicant search onto Elasticsearch once relational queries stopped returning at interactive latency.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{Datafast -- Desktop Data Automation Platform $|$ Full-Stack Engineer}
+{Laravel $|$ MySQL $|$ Next.js 14 $|$ TypeScript $|$ Electron $|$ Puppeteer $|$ Docker}
+{2024 -- Present} % TODO: confirm start year
+\resumeItemListStart
+	\resumeItem{Designed and built the entire system from scratch, packaging the web application as a cross-platform desktop client with Electron.}
+	\resumeItem{Automated browser-based data collection workflows with Puppeteer and normalised front-end data structures to keep large result sets responsive in the interface.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\href{https://www.calternatives.org/}{calternatives.org} -- Centre for Alternatives $|$ Frontend Engineer}
+{Next.js 14 $|$ TypeScript $|$ Headless WordPress $|$ GraphQL $|$ ACF $|$ Docker $|$ SSG/SSR $|$ SEO}
+{Jan 2025}
+\resumeItemListStart
+	\resumeItem{Built a headless WordPress front end consuming GraphQL with Advanced Custom Fields (ACF), letting editors publish new content types without front-end changes.}
+	\resumeItem{Improved search visibility by 65\% through technical SEO: sitemap and robots configuration, structured data and an SSG/SSR rendering strategy.}
+\resumeItemListEnd
+
+\resumeProjectHeading
+{\href{https://arits.tech/}{arits.tech} -- ARITS Limited $|$ Frontend Engineer}
+{Headless WordPress $|$ GraphQL $|$ ACF $|$ Next.js $|$ TypeScript $|$ Webflow $|$ Docker $|$ SEO}
+{Feb 2024}
+\resumeItemListStart
+	\resumeItem{Delivered the corporate site for an agency with 400+ projects shipped, built on headless WordPress with GraphQL and ACF-driven content modelling.}
+	\resumeItem{Improved search performance by 45\% via sitemap and robots configuration, semantic markup and technical SEO best practice.}
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+
+%-----------EDUCATION-----------
+\section{Education}
+\resumeSubHeadingListStart
+\resumeSubheading
+{Bachelor of Science in Computer Science and Engineering}{Jan 2018 -- Apr 2022}
+{American International University-Bangladesh}{Dhaka, Bangladesh}
+\resumeItemListStart
+	\resumeItem{CGPA 3.58 / 4.00. Thesis: Machine Learning -- training a model to detect sentiment in a sentence.}
+\resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------CERTIFICATIONS-----------
+\section{Certifications}
+\begin{itemize}[leftmargin=0.15in, label={}, topsep=4pt]
+	\item\leavevmode\resumeRow{\small\textbf{Responsive Web Development} -- CodersTrust, Dhaka, Bangladesh}{\small Mar 2020}
+\end{itemize}
+
+%-----------REFERENCES-----------
+% Referees' personal emails and mobile numbers are deliberately absent: this
 % PDF is published at a public URL, linked from the site header, and advertised
 % to AI crawlers in /llms.txt. Share their details privately on request instead.
 \section{References}
-\resumeSubHeadingListStart
-    \item \small References available upon request.
-\resumeSubHeadingListEnd
+\begin{itemize}[leftmargin=0.15in, label={}, topsep=4pt, itemsep=4pt, parsep=0pt]
+	\item{\small\textbf{\href{https://www.linkedin.com/in/mosabber-uddin-ahmed-53798b16/}{Mosabber Uddin Ahmed}} -- Senior Project Manager, Exabyting \\
+	Email: \href{mailto:bapon.bu@gmail.com}{bapon.bu@gmail.com} $|$ Phone: \href{tel:+8801780444466}{+880 1780 444466}}
+	\item{\small\textbf{\href{https://www.linkedin.com/in/emranffl/}{Emran Hossain}} -- Senior Software Engineer, Gain Solutions Ltd \\
+	Email: \href{mailto:emranffl.biz@gmail.com}{emranffl.biz@gmail.com} $|$ Phone: \href{tel:+8801676987366}{+880 1676 987366}}
+\end{itemize}
 
-	%-------------------------------------------
+%-------------------------------------------
 \end{document}

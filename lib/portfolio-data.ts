@@ -207,7 +207,7 @@ export const projects: Project[] = [
     description:
       "Multi-company HR platform (humr.work) covering the full employment lifecycle across three Next.js apps that share one login. Built SSO across subdomains via encrypted cookie sharing, a Turborepo package graph, a dynamic form builder, and attendance clock in/out.",
     image: "/img/humr-image.png",
-    stacks: ["Next.js 15", "TypeScript", "Turborepo", "Cryptography", "TanStack Query", "ShadCN UI"],
+    stacks: ["Next.js 16", "TypeScript", "Turborepo", "Cryptography", "TanStack Query", "ShadCN UI"],
     // Dev environment, behind a login. Kept deliberately: the build-time ping in
     // lib/link-status.ts drops the button, the schema `sameAs`, and the llms.txt
     // line by itself if the host goes away, so a torn-down dev box cannot leave
