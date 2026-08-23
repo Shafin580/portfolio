@@ -2,7 +2,7 @@
 name: frontend
 description: Senior frontend engineer for this Next.js portfolio site. Use for all React/TypeScript work — building components, pages, hooks, and styling.
 tools: Read, Write, Edit, Bash, Grep, Glob, Agent
-model: opus
+model: sonnet
 skills:
   - frontend
   - git

@@ -2,7 +2,7 @@
 name: code-review
 description: Reviews code changes for convention compliance, bugs, security, and quality. Use after writing code, before commits, or to audit specific files/modules. Produces structured review with verdict.
 tools: Read, Bash, Grep, Glob
-model: opus
+model: sonnet
 skills:
   - code-review
   - frontend

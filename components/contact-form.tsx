@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,93 +24,126 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2 } from "lucide-react";
+import {
+  contactSchema,
+  PROJECT_TYPES,
+  projectTypeLabel,
+  type ContactInput,
+} from "@/lib/contact-schema";
+import { profile } from "@/lib/portfolio-data";
 
-const schema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.email("Please enter a valid email address"),
-  company: z.string().optional(),
-  projectType: z.string().min(1, "Please select a project type"),
-  description: z
-    .string()
-    .min(20, "Please describe your project in at least 20 characters"),
-});
+/**
+ * The client half of the contact pipeline. Its server half is
+ * `app/api/contact/route.ts`, and both parse the same schema — see `lib/contact-schema.ts`
+ * for why `company` is a real field and `website` is the honeypot.
+ *
+ * The form never assumes it is configured. If the API answers `503 not_configured` —
+ * which it does until the Resend and Turnstile keys are set — the submission falls back
+ * to a pre-filled `mailto:` rather than showing the visitor an error for a problem that
+ * is not theirs.
+ */
 
-type FormValues = z.infer<typeof schema>;
-
-const PROJECT_TYPES = [
-  { value: "web-app", label: "Web Application" },
-  { value: "ecommerce", label: "E-commerce Platform" },
-  { value: "landing-page", label: "Landing Page / Marketing Site" },
-  { value: "dashboard", label: "Admin Dashboard" },
-  { value: "api-backend", label: "Backend API / Microservice" },
-  { value: "fullstack", label: "Full-Stack Product" },
-  { value: "other", label: "Other" },
-];
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function ContactForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState("");
+  // Remounting the widget is how it gets reset. The imperative `.reset()` needs a ref,
+  // and reading a ref inside the submit handler that `handleSubmit` receives during
+  // render trips react-hooks/refs — a key bump does the same job with no ref at all.
+  const [captchaKey, setCaptchaKey] = useState(0);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<ContactInput>({
+    resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
       company: "",
-      projectType: "",
+      projectType: undefined,
       description: "",
+      website: "",
+      turnstileToken: "",
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  function openMailto(values: ContactInput, description: string) {
+    const subject = encodeURIComponent(`Project Inquiry: ${projectTypeLabel(values.projectType)}`);
+    const body = encodeURIComponent(
+      `Hi ${profile.name.split(" ")[0]},\n\nName: ${values.name}\nEmail: ${values.email}${
+        values.company ? `\nCompany: ${values.company}` : ""
+      }\nProject Type: ${projectTypeLabel(values.projectType)}\n\n${values.description}`,
+    );
+    window.open(`mailto:${profile.email}?subject=${subject}&body=${body}`);
+    toast.success("Opening your email client…", { description });
+    form.reset();
+  }
+
+  function resetCaptcha() {
+    setToken("");
+    setCaptchaKey((k) => k + 1);
+  }
+
+  async function onSubmit(values: ContactInput) {
     setIsLoading(true);
     try {
-      const endpoint = process.env.NEXT_PUBLIC_FORMSPREE_URL;
-
-      if (!endpoint) {
-        // Fallback: open email client with pre-filled content
-        const subject = encodeURIComponent(
-          `Project Inquiry: ${PROJECT_TYPES.find((t) => t.value === values.projectType)?.label ?? values.projectType}`
-        );
-        const body = encodeURIComponent(
-          `Hi Shafin,\n\nName: ${values.name}\nEmail: ${values.email}${values.company ? `\nCompany: ${values.company}` : ""}\nProject Type: ${values.projectType}\n\n${values.description}`
-        );
-        window.open(`mailto:shafinwork580@gmail.com?subject=${subject}&body=${body}`);
-        toast.success("Opening your email client…", {
-          description: "A pre-filled email has been prepared for you.",
-        });
-        form.reset();
-        return;
-      }
-
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, turnstileToken: token }),
       });
 
       if (response.ok) {
         toast.success("Message sent!", {
-          description:
-            "Thanks for reaching out. I'll get back to you within 24 hours.",
+          description: "Thanks for reaching out. I'll get back to you within 24 hours.",
         });
         form.reset();
-      } else {
-        throw new Error("Submission failed");
+        resetCaptcha();
+        return;
       }
+
+      const { error } = (await response.json().catch(() => ({}))) as { error?: string };
+
+      // Not configured yet — this is a deployment state, not the visitor's problem.
+      if (response.status === 503 || error === "not_configured") {
+        openMailto(values, "A pre-filled email has been prepared for you.");
+        return;
+      }
+
+      if (response.status === 429) {
+        toast.error("Too many messages", {
+          description: `Please wait a few minutes, or email me directly at ${profile.email}`,
+        });
+        resetCaptcha();
+        return;
+      }
+
+      if (error === "captcha_failed") {
+        toast.error("Verification failed", {
+          description: "Please complete the verification again and resubmit.",
+        });
+        resetCaptcha();
+        return;
+      }
+
+      throw new Error(error ?? "submission_failed");
     } catch {
       toast.error("Something went wrong", {
-        description:
-          "Please try again or email me directly at shafinwork580@gmail.com",
+        description: `Please try again or email me directly at ${profile.email}`,
       });
+      resetCaptcha();
     } finally {
       setIsLoading(false);
     }
   }
 
+  // With a site key configured, a submission without a token cannot pass the server
+  // check — so the button waits for one rather than letting the visitor fail.
+  const awaitingCaptcha = Boolean(SITE_KEY) && !token;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="name"
@@ -118,7 +151,12 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input
+                    placeholder="John Doe"
+                    autoComplete="name"
+                    enterKeyHint="next"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -131,7 +169,14 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Email *</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="john@example.com" {...field} />
+                  <Input
+                    type="email"
+                    inputMode="email"
+                    placeholder="john@example.com"
+                    autoComplete="email"
+                    enterKeyHint="next"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -139,18 +184,23 @@ export function ContactForm() {
           />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="company"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Company{" "}
-                  <span className="text-muted-foreground font-normal">(optional)</span>
+                  Company <span className="text-muted-foreground font-normal">(optional)</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Acme Inc." {...field} />
+                  <Input
+                    placeholder="Acme Inc."
+                    autoComplete="organization"
+                    enterKeyHint="next"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -200,7 +250,51 @@ export function ContactForm() {
           )}
         />
 
-        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+        {/*
+          Honeypot. Hidden from sight, from assistive tech, and from the tab order, so
+          only an automated filler ever populates it. The server treats a filled value as
+          a bot and answers 200 without sending anything.
+        */}
+        <div aria-hidden="true" className="hidden">
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            {...form.register("website")}
+          />
+        </div>
+
+        {SITE_KEY ? (
+          /*
+            Turnstile's "flexible" size still has a hard 300px minimum width, which is
+            wider than this column gets on a 320px screen — measured, it scrolled the
+            whole document sideways by 21px. Containing the overflow here keeps the widget
+            fully interactive and untransformed while the page itself stays put.
+          */
+          <div className="max-w-full overflow-x-auto">
+            <Turnstile
+              key={captchaKey}
+              siteKey={SITE_KEY}
+              options={{ theme: "auto", size: "flexible" }}
+              onSuccess={setToken}
+              onExpire={() => setToken("")}
+              onError={() => setToken("")}
+            />
+          </div>
+        ) : null}
+
+        {/*
+          The button below disables itself until Turnstile hands over a token. Without a
+          word of explanation that reads as a broken form, so say what is happening —
+          politely, in a live region, so it is announced rather than only seen.
+        */}
+        <p aria-live="polite" className="text-muted-foreground min-h-5 text-xs">
+          {awaitingCaptcha ? "Waiting for the security check to finish…" : ""}
+        </p>
+
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading || awaitingCaptcha}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -63,6 +63,19 @@ export async function generateMetadata({
   const description = study.overview;
   const path = `/projects/${project.slug}`;
 
+  /**
+   * Rendered at build time by `scripts/generate-og.tsx` into `public/og/<slug>.png`, not
+   * by an `opengraph-image.tsx` route — that route kept `next/og` in the Cloudflare
+   * Worker bundle and pushed it past the 3 MiB free-plan script limit. Adding a new case
+   * study regenerates its card on the next build.
+   */
+  const ogImage = {
+    url: `/og/${project.slug}.png`,
+    width: 1200,
+    height: 630,
+    alt: `${project.title} case study${study.client ? ` for ${study.client}` : ""} by ${profile.name}`,
+  } as const;
+
   return {
     title,
     description,
@@ -99,10 +112,9 @@ export async function generateMetadata({
       authors: [profile.name],
       section: "Case Studies",
       tags: project.stacks,
-      // Image comes from ./opengraph-image.tsx via the file convention. Setting
-      // `images` here by hand would override it and lose the per-project alt.
+      images: [ogImage],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [ogImage.url] },
   };
 }
 
@@ -122,8 +134,8 @@ function Section({
     <AnimatedSection animation="fadeInUp" delay={delay}>
       <section className="space-y-4">
         <h2 className="flex items-center gap-2.5 text-2xl font-bold">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20">
-            <Icon className="h-4.5 w-4.5 text-primary" />
+          <span className="bg-primary/10 border-primary/20 flex h-9 w-9 items-center justify-center rounded-lg border">
+            <Icon className="text-primary h-4.5 w-4.5" />
           </span>
           {title}
         </h2>
@@ -171,13 +183,13 @@ export default async function ProjectCaseStudyPage({
           __html: JSON.stringify(buildProjectStructuredData(project, isLive)),
         }}
       />
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <SiteHeader hrefPrefix="/" />
 
         <main>
           {/* ── Hero ── */}
-          <section className="border-b bg-muted/40">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <section className="bg-muted/40 border-b">
+            <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
               <AnimatedSection animation="fadeInUp">
                 {/* Mirrors the BreadcrumbList node item-for-item — see
                     lib/structured-data.ts. Edit the two together. */}
@@ -191,24 +203,24 @@ export default async function ProjectCaseStudyPage({
               </AnimatedSection>
 
               <AnimatedSection animation="fadeInUp" delay={100}>
-                <h1 className="mt-6 text-4xl sm:text-5xl font-bold tracking-tight">
+                <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
                   {project.title}
                 </h1>
                 <p
                   data-speakable="overview"
-                  className="mt-4 max-w-3xl text-lg text-muted-foreground leading-relaxed"
+                  className="text-muted-foreground mt-4 max-w-3xl text-lg leading-relaxed"
                 >
                   {study.overview}
                 </p>
               </AnimatedSection>
 
               <AnimatedSection animation="fadeInUp" delay={200}>
-                <dl className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <dl className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {meta.map(({ icon: Icon, label, value }) => (
                     <div key={label} className="flex items-start gap-2.5">
-                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <Icon className="text-primary mt-0.5 h-4 w-4 shrink-0" />
                       <div>
-                        <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                        <dt className="text-muted-foreground text-xs tracking-wide uppercase">
                           {label}
                         </dt>
                         <dd className="text-sm font-medium">{value}</dd>
@@ -265,15 +277,15 @@ export default async function ProjectCaseStudyPage({
                   same number standing on its own is not. */}
               {study.stats.length > 0 && (
                 <AnimatedSection animation="fadeInUp" delay={400}>
-                  <dl className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <dl className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     {study.stats.map((stat) => (
-                      <div key={stat.label} className="rounded-lg border bg-background p-4">
+                      <div key={stat.label} className="bg-background rounded-lg border p-4">
                         <dt className="sr-only">{stat.label}</dt>
                         <dd>
-                          <span className="block text-2xl sm:text-3xl font-bold tracking-tight text-primary">
+                          <span className="text-primary block text-2xl font-bold tracking-tight sm:text-3xl">
                             {stat.value}
                           </span>
-                          <span className="mt-1 block text-xs text-muted-foreground leading-snug">
+                          <span className="text-muted-foreground mt-1 block text-xs leading-snug">
                             {stat.label}
                           </span>
                         </dd>
@@ -292,21 +304,21 @@ export default async function ProjectCaseStudyPage({
           {study.takeaways.length > 0 && (
             <section
               aria-labelledby="takeaways-heading"
-              className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12"
+              className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8"
             >
               <AnimatedSection animation="fadeInUp">
-                <div className="rounded-xl border bg-muted/40 p-6 sm:p-8">
+                <div className="bg-muted/40 rounded-xl border p-6 sm:p-8">
                   <h2
                     id="takeaways-heading"
                     className="flex items-center gap-2.5 text-lg font-bold"
                   >
-                    <Lightbulb className="h-5 w-5 text-primary" aria-hidden />
+                    <Lightbulb className="text-primary h-5 w-5" aria-hidden />
                     Key takeaways
                   </h2>
                   <ul data-speakable="takeaways" className="mt-4 space-y-3">
                     {study.takeaways.map((takeaway) => (
                       <li key={takeaway} className="flex gap-2.5 leading-relaxed">
-                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                        <CheckCircle2 className="text-primary mt-1 h-4 w-4 shrink-0" aria-hidden />
                         <span>{takeaway}</span>
                       </li>
                     ))}
@@ -317,7 +329,10 @@ export default async function ProjectCaseStudyPage({
           )}
 
           {/* ── Screenshot ── */}
-          <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+          <section
+            aria-label={`${project.title} screenshot`}
+            className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8"
+          >
             <AnimatedSection animation="scaleIn">
               <div className="overflow-hidden rounded-xl border shadow-sm">
                 <ProjectMedia
@@ -332,7 +347,7 @@ export default async function ProjectCaseStudyPage({
           </section>
 
           {/* ── Body ── */}
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-14">
+          <div className="mx-auto max-w-5xl space-y-14 px-4 py-14 sm:px-6 lg:px-8">
             <Section icon={Target} title="The problem">
               <p className="text-muted-foreground leading-relaxed">{study.problem}</p>
             </Section>
@@ -348,8 +363,8 @@ export default async function ProjectCaseStudyPage({
             <Section icon={CheckCircle2} title="What it does" delay={100}>
               <ul className="grid gap-3 sm:grid-cols-2">
                 {study.features.map((feature) => (
-                  <li key={feature} className="flex gap-2.5 text-sm text-muted-foreground">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <li key={feature} className="text-muted-foreground flex gap-2.5 text-sm">
+                    <CheckCircle2 className="text-primary mt-0.5 h-4 w-4 shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -400,7 +415,7 @@ export default async function ProjectCaseStudyPage({
                           href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-medium hover:text-primary transition-colors underline underline-offset-4 decoration-muted-foreground/40"
+                          className="hover:text-primary decoration-muted-foreground/40 font-medium underline underline-offset-4 transition-colors"
                         >
                           {source.label}
                         </a>
@@ -419,8 +434,8 @@ export default async function ProjectCaseStudyPage({
               Same array that feeds the FAQPage node, so the rendered questions
               and the structured data cannot disagree. */}
           {study.faqs.length > 0 && (
-            <div className="border-t bg-background">
-              <div className="max-w-5xl mx-auto">
+            <div className="bg-background border-t">
+              <div className="mx-auto max-w-5xl">
                 <Faq
                   items={study.faqs}
                   id="project-faq"
@@ -435,17 +450,17 @@ export default async function ProjectCaseStudyPage({
 
           {/* ── Prev / next ── */}
           {(previous || next) && (
-            <section className="border-t bg-muted/40">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid gap-4 sm:grid-cols-2">
+            <section aria-label="More case studies" className="bg-muted/40 border-t">
+              <div className="mx-auto grid max-w-5xl gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:px-8">
                 {previous ? (
                   <Link
                     href={`/projects/${previous.slug}`}
-                    className="group rounded-lg border bg-background p-5 transition-colors hover:border-primary/50"
+                    className="group bg-background hover:border-primary/50 rounded-lg border p-5 transition-colors"
                   >
-                    <span className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                    <span className="text-muted-foreground flex items-center gap-1.5 text-xs tracking-wide uppercase">
                       <ArrowLeft className="h-3.5 w-3.5" /> Previous
                     </span>
-                    <span className="mt-1.5 block font-semibold group-hover:text-primary transition-colors">
+                    <span className="group-hover:text-primary mt-1.5 block font-semibold transition-colors">
                       {previous.title}
                     </span>
                   </Link>
@@ -455,12 +470,12 @@ export default async function ProjectCaseStudyPage({
                 {next && (
                   <Link
                     href={`/projects/${next.slug}`}
-                    className="group rounded-lg border bg-background p-5 text-right transition-colors hover:border-primary/50 sm:col-start-2"
+                    className="group bg-background hover:border-primary/50 rounded-lg border p-5 text-right transition-colors sm:col-start-2"
                   >
-                    <span className="flex items-center justify-end gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                    <span className="text-muted-foreground flex items-center justify-end gap-1.5 text-xs tracking-wide uppercase">
                       Next <ArrowRight className="h-3.5 w-3.5" />
                     </span>
-                    <span className="mt-1.5 block font-semibold group-hover:text-primary transition-colors">
+                    <span className="group-hover:text-primary mt-1.5 block font-semibold transition-colors">
                       {next.title}
                     </span>
                   </Link>
@@ -471,9 +486,9 @@ export default async function ProjectCaseStudyPage({
 
           {/* ── CTA ── */}
           <section className="border-t">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
+            <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 lg:px-8">
               <h2 className="text-2xl font-bold">Building something similar?</h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="text-muted-foreground mt-2">
                 I&apos;m open to new opportunities and project work.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">

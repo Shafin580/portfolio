@@ -23,7 +23,7 @@
       "mcp__chrome-devtools__resize_page",
       "mcp__chrome-devtools__evaluate_script",
       "mcp__chrome-devtools__list_console_messages",
-      "Bash(du -sh /home/shafin-ahmed/dev/projects/portfolio/public/img/*)"
+      "Bash(du -sh /Users/shafin/dev/projects/portfolio/public/img/*)"
     ]
   },
   "enabledMcpjsonServers": [

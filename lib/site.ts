@@ -6,9 +6,10 @@
  * The trailing-slash strip is load-bearing: `NEXT_PUBLIC_SITE_URL` has
  * historically been set with a trailing `/`, which produced `//sitemap.xml`.
  */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://portfolio-shafin580s-projects.vercel.app"
-).replace(/\/+$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://shadev-tech.com").replace(
+  /\/+$/,
+  ""
+);
 
 /** Build an absolute URL from a site-root-relative path. */
 export function absoluteUrl(path = "/"): string {

@@ -10,7 +10,7 @@ Read side of the knowledge system. The write side is the `learn` skill.
 ## Where to Look
 
 ```
-~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/
+~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/
   MEMORY.md          # one-line index, already in context every session
   <slug>.md          # one memory per file
 ```
@@ -56,7 +56,7 @@ Pull out:
 1. **`MEMORY.md` first** — its one-line hooks are written to be matched against.
 2. **Grep the memory dir** for keywords and tags:
    ```bash
-   rg -il '<keyword>' ~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/
+   rg -il '<keyword>' ~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/
    ```
 3. **Read the hits.** Memory files are small; read them whole.
 4. **Widen only if empty** — try synonyms, then the tag line, then `.claude/skills/` and

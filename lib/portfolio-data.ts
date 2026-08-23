@@ -200,6 +200,9 @@ const BONHISHIKHA = "https://unlearngender.com/";
 /** Every case study on this site was written up on the same day. */
 const CASE_STUDY_DATE = "2026-08-04";
 
+/** Tazcreates shipped after the first batch, so it carries its own write-up date. */
+const TAZCREATES_DATE = "2026-08-23";
+
 export const projects: Project[] = [
   {
     slug: "humr",
@@ -700,6 +703,106 @@ export const projects: Project[] = [
         { name: "Bonhishikha", url: BONHISHIKHA, role: "Convenor" },
         ARITS,
       ],
+      externalCaseStudy: null,
+    },
+  },
+  {
+    slug: "tazcreates",
+    title: "Tazcreates",
+    description:
+      "Commission site for Tazmeen Zabiyaan, a portrait artist based in Canada. Single-page Next.js 16 build on Cloudflare Workers, with a Turnstile-gated commission form delivering through Resend.",
+    image: "/img/tazcreates.png",
+    stacks: [
+      "Next.js 16",
+      "TypeScript",
+      "Tailwind CSS v4",
+      "Cloudflare Workers",
+      "OpenNext",
+      "Resend",
+      "Cloudflare Turnstile",
+    ],
+    live: "https://tazcreates.site/",
+    repo: null,
+    category: "professional",
+    schemaType: "WebSite",
+    caseStudy: {
+      client: "Tazcreates",
+      year: "2026",
+      role: "Full-Stack Engineer",
+      publishedDate: TAZCREATES_DATE,
+      updatedDate: TAZCREATES_DATE,
+      overview:
+        "Tazcreates is the commission site for Tazmeen Zabiyaan, a portrait artist based in Canada working in acrylic, oil pastel, and ink. It is one page \u2014 gallery, pricing, process, FAQ \u2014 ending in a commission form that is a public endpoint anyone can post to, deployed on Cloudflare Workers under a 3 MiB free-plan script budget.",
+      takeaways: [
+        "Cloudflare Pages could not host this site: @cloudflare/next-on-pages is deprecated and does not support Next 16, so the build moved to @opennextjs/cloudflare on Workers.",
+        "Rendering the social card once at build time into public/og.png removed 820 KB gzipped from the Worker payload, because next/og pulls resvg.wasm and yoga.wasm into the runtime graph.",
+        "The commission endpoint runs five checks \u2014 schema parse, honeypot, per-IP rate limit, server-side Turnstile verification, then send \u2014 before any email leaves, and the recipient address is always read from the environment rather than the request body.",
+      ],
+      stats: [
+        { value: "820 KB", label: "gzipped removed from the Worker payload" },
+        { value: "21%", label: "reduction in compiled script size" },
+        { value: "3 MiB", label: "free-plan Workers script limit" },
+        { value: "5", label: "checks before an email is sent" },
+      ],
+      problem:
+        "A commission form is the whole business case for an artist's site, and it is also the part that attracts abuse: it is a public endpoint that spends money on every send and can be pointed at arbitrary recipients if it is written carelessly. The deployment added a second constraint. The original Cloudflare Pages build failed outright \u2014 @cloudflare/next-on-pages is deprecated and has no Next 16 support \u2014 and the Workers plan that replaced it caps a compiled script at 3 MiB gzipped, which the first build exceeded.",
+      solution:
+        "The site migrated to @opennextjs/cloudflare, which compiles the Next output into a Worker plus a static asset directory. Getting under the script limit was a measurement exercise, not a guess: deleting unreachable files moved the payload zero bytes because Next never bundled them, while moving the social card out of next/og and into a build-time script removed 820 KB. Static assets are served from Cloudflare's asset store and do not count against the limit. The commission route re-parses every submission against the same Zod schema the form uses, treats a filled honeypot as a silent success so bots learn nothing, rate-limits per IP before spending a Turnstile call, verifies the captcha token server-side and fails closed on a verification outage, and only then sends \u2014 always to the configured address, never to one supplied in the payload.",
+      features: [
+        "Single-page build: hero, masonry gallery with lightbox, pricing tiers, commission process, FAQ",
+        "Commission form validated by one Zod schema shared between the client and the API route",
+        "Honeypot, per-IP rate limit, and server-verified Cloudflare Turnstile in front of every send",
+        "Resend + React Email delivery, with a best-effort confirmation back to the visitor",
+        "Reduced-motion-aware marquee and scroll reveals",
+        "Server-rendered JSON-LD and a build-time Open Graph card",
+        "Deployed to Cloudflare Workers via OpenNext, with the custom domain pinned in wrangler.jsonc",
+      ],
+      outcomes: [
+        "Compiled Worker script reduced 21%, from 3,833,495 to 3,013,678 bytes gzipped, fitting the 3 MiB free-plan limit",
+        "Commission requests reach the artist by email instead of only through Instagram direct messages",
+        "Deployed on Cloudflare Workers after the deprecated Pages adapter blocked the original build",
+      ],
+      faqs: [
+        {
+          question: "Why does this site run on Cloudflare Workers instead of Cloudflare Pages?",
+          answer:
+            "@cloudflare/next-on-pages, the adapter the Pages git integration uses for Next.js, is deprecated and does not support Next 16. @opennextjs/cloudflare produces a Worker plus a static asset directory instead, which the Pages integration cannot deploy \u2014 so the hosting product had to change along with the adapter.",
+        },
+        {
+          question:
+            "How do you fit a Next.js site inside the 3 MiB Cloudflare Workers script limit?",
+          answer:
+            "By measuring rather than guessing. On this site, deleting unreachable files and unused packages changed the payload by zero bytes, because nothing in the module graph reachable from app/ imported them. What actually cost bytes was next/og: two metadata routes kept resvg.wasm, yoga.wasm, and a font blob in the runtime graph. Rendering the same card once at build time into public/og.png removed 820 KB gzipped, and static assets do not count against the script limit.",
+        },
+        {
+          question: "How is the public commission form protected from abuse?",
+          answer:
+            "Five checks run before any email is sent, cheapest first: the payload is re-parsed against the shared Zod schema, a filled honeypot field returns a success response so a bot gets no signal, requests are rate-limited per IP, the Cloudflare Turnstile token is verified server-side against Cloudflare and fails closed if verification is unreachable, and only then does the send run. The recipient address always comes from an environment variable, never from the request body.",
+        },
+        {
+          question: "Where do commission requests get delivered?",
+          answer:
+            "Through Resend, using React Email templates. The artist receives the request with the visitor's address set as the reply-to, and the visitor receives a confirmation. The confirmation is sent last and best-effort \u2014 if it fails it is logged and swallowed, so a delivery problem on the copy never turns a successful submission into an error the visitor would retry.",
+        },
+      ],
+      sources: [
+        {
+          label: "Tazcreates",
+          url: "https://tazcreates.site/",
+          publisher: "Tazcreates",
+        },
+        {
+          label: "OpenNext Cloudflare adapter",
+          url: "https://opennext.js.org/cloudflare",
+          publisher: "OpenNext",
+        },
+        {
+          label: "Cloudflare Turnstile",
+          url: "https://developers.cloudflare.com/turnstile/",
+          publisher: "Cloudflare",
+        },
+      ],
+      entities: [{ name: "Tazcreates", url: "https://tazcreates.site/", role: "Client" }],
       externalCaseStudy: null,
     },
   },

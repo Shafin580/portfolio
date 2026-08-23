@@ -2,7 +2,7 @@
 name: qa
 description: Senior QA engineer for this portfolio site. Use for testing, bug verification, code quality audits, finding edge cases, reviewing error handling, and validating frontend changes.
 tools: Read, Bash, Grep, Glob, Agent
-model: opus
+model: sonnet
 skills:
   - frontend
   - git
