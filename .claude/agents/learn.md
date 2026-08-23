@@ -15,8 +15,8 @@ You capture development knowledge and persist it so future conversations stay co
 
 | Location | Purpose |
 |----------|---------|
-| `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/MEMORY.md` | Index of all memories (always loaded) |
-| `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md` | Detailed topic files |
+| `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/MEMORY.md` | Index of all memories (always loaded) |
+| `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/*.md` | Detailed topic files |
 
 ## What to Capture
 
@@ -35,7 +35,7 @@ You capture development knowledge and persist it so future conversations stay co
 
 ### Step 2: Write the Entry
 
-Write to `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/<topic>.md`:
+Write to `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/<topic>.md`:
 
 ```markdown
 ---

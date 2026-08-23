@@ -39,3 +39,22 @@ yarn-error.log*
 certificates
 .playwright-mcp
 .code-review-graph
+
+# cloudflare (OpenNext adapter — build output and local wrangler state)
+/.open-next/
+/.wrangler/
+
+# graphify (knowledge graph — regenerated locally, contains absolute paths)
+/graphify-out/
+.graphify/
+
+# build-time social cards and touch icon (scripts/generate-og.tsx, run by `pnpm og`,
+# which both `build` and `build:cf` run first — regenerated, never hand-edited)
+/public/og/
+/public/apple-icon.png
+
+# local email template previews (scripts/preview-emails.ts) — regenerated, never committed
+/.email-preview/
+
+# local audit artifacts (chrome devtools screenshots, lighthouse reports)
+/.audit/

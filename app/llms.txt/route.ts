@@ -21,14 +21,20 @@ export async function GET() {
   const linkStatus = await checkLinks(projects.map((p) => p.live));
 
   const projectLines = projects.map((project) => {
+    // llmstxt.org asks for markdown links rather than bare URLs, and Lighthouse's
+    // `llms-txt` audit fails a file that carries none. The URL still reads fine in plain
+    // text, so nothing is lost by labelling it.
     const live =
-      project.live && linkStatus[project.live] === "alive" ? ` — Live: ${project.live}` : "";
-    const repo = project.repo ? ` — Source: ${project.repo}` : "";
+      project.live && linkStatus[project.live] === "alive"
+        ? ` — Live: [${project.title}](${project.live})`
+        : "";
+    const repo = project.repo ? ` — Source: [${project.title} repository](${project.repo})` : "";
     // Both forms are offered on purpose: the HTML page for anything that
     // renders, and the plain-text brief for anything that would rather not
     // parse HTML to reach the same content.
     const study = project.caseStudy
-      ? ` — Case study: ${SITE_URL}/projects/${project.slug} (plain text: ${SITE_URL}/projects/${project.slug}/llms.txt)`
+      ? ` — Case study: [${project.title} case study](${SITE_URL}/projects/${project.slug})` +
+        ` (plain text: [${project.title} case study, plain text](${SITE_URL}/projects/${project.slug}/llms.txt))`
       : "";
     return `- **${project.title}** (${project.category}) — ${project.description} Stack: ${project.stacks.join(
       ", ",
@@ -55,10 +61,10 @@ export async function GET() {
 ${profile.name} is a full-stack software engineer based in ${profile.locality}, ${profile.countryName}, currently working as a ${experience[0].role} at ${profile.employer}. This file summarises the content of ${SITE_URL} for language models and answer engines.
 
 ## Contact
-- Email: ${profile.email}
-- GitHub: ${profile.github}
-- LinkedIn: ${profile.linkedin}
-- Website: ${SITE_URL}
+- Email: [${profile.email}](mailto:${profile.email})
+- GitHub: [${profile.name} on GitHub](${profile.github})
+- LinkedIn: [${profile.name} on LinkedIn](${profile.linkedin})
+- Website: [${profile.name} — portfolio](${SITE_URL})
 - Location: ${profile.locality}, ${profile.countryName} (available for remote and international work)
 - Status: open to new opportunities and project work
 

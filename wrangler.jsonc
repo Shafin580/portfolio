@@ -1,0 +1,76 @@
+/**
+ * Cloudflare Workers config for the OpenNext adapter.
+ *
+ * Not Cloudflare Pages: `@cloudflare/next-on-pages` is deprecated and does not support
+ * Next 16. `opennextjs-cloudflare build` compiles the Next output into
+ * `.open-next/worker.js` plus a static `.open-next/assets` directory, both pointed at
+ * below, and the Pages git integration cannot deploy that shape.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portfolio",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-01",
+
+  // nodejs_compat: resend and @react-email/components both reach for Node built-ins.
+  // global_fetch_strictly_public: a fetch to this site's own hostname goes out over the
+  // public internet instead of looping back inside the isolate — what Next expects, and
+  // what lib/link-status.ts needs when it pings a project URL.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // `wrangler deploy` makes this file the source of truth and overwrites whatever the
+  // dashboard says. Configure routes and vars HERE, not there — a deploy from a config
+  // missing these keys detaches the custom domain, re-enables workers.dev, and wipes
+  // every var.
+  "workers_dev": false,
+  "routes": [{ "pattern": "shadev-tech.com", "custom_domain": true }],
+
+  // Non-secret runtime values only, read by app/api/contact/route.ts. This list is
+  // authoritative: anything omitted here is DELETED from the Worker on deploy.
+  //
+  // Secrets never go in this file — it is committed. Set RESEND_API_KEY and
+  // TURNSTILE_SECRET_KEY with `wrangler secret put <NAME>`. Secrets live outside this
+  // config and survive deploys untouched, which plaintext vars do not.
+  //
+  // NEXT_PUBLIC_* are absent on purpose: Next inlines those at build time from .env, so
+  // a Worker runtime var for them would have no effect.
+  "vars": {
+    "CONTACT_TO_EMAIL": "shafinwork580@gmail.com",
+    "CONTACT_FROM_EMAIL": "contact@shadev-tech.com"
+  },
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // next/image is used with the local screenshots in public/img, and next.config.ts asks
+  // for AVIF/WebP. Without an image binding or a custom loader, optimization fails at
+  // runtime. Transformations are metered beyond the free tier — set
+  // `images: { unoptimized: true }` in next.config.ts to opt out entirely.
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  // ISR cache. This site revalidates every 24h (see open-next.config.ts), so unlike a
+  // fully static build it genuinely needs one. The binding NAME is fixed by the adapter;
+  // only bucket_name is yours to choose, and the bucket must exist before first deploy:
+  //   pnpm exec wrangler r2 bucket create portfolio-inc-cache
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "portfolio-inc-cache"
+    }
+  ],
+
+  // OpenNext calls back into this Worker to revalidate. A service binding cannot point at
+  // a Worker that does not exist yet, so the FIRST deploy must go out with this block
+  // commented out; add it back and redeploy once the Worker exists. `service` must match
+  // `name` above.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "portfolio"
+    }
+  ]
+}

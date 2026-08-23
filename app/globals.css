@@ -125,76 +125,216 @@
 
 /* ── Hero entrance animations (fire on page load, no IntersectionObserver needed) ── */
 @keyframes hero-fade-up {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes hero-scale-in {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes hero-slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.hero-animate-1 { opacity: 0; animation: hero-fade-up  0.7s ease-out 0.10s forwards; }
-.hero-animate-2 { opacity: 0; animation: hero-fade-up  0.7s ease-out 0.25s forwards; }
-.hero-animate-3 { opacity: 0; animation: hero-fade-up  0.7s ease-out 0.40s forwards; }
-.hero-animate-4 { opacity: 0; animation: hero-slide-up 0.6s ease-out 0.55s forwards; }
-.hero-animate-5 { opacity: 0; animation: hero-slide-up 0.6s ease-out 0.65s forwards; }
-.hero-animate-photo { opacity: 0; animation: hero-scale-in 0.8s ease-out 0.30s forwards; }
+.hero-animate-1 {
+  opacity: 0;
+  animation: hero-fade-up 0.7s ease-out 0.1s forwards;
+}
+.hero-animate-2 {
+  opacity: 0;
+  animation: hero-fade-up 0.7s ease-out 0.25s forwards;
+}
+.hero-animate-3 {
+  opacity: 0;
+  animation: hero-fade-up 0.7s ease-out 0.4s forwards;
+}
+.hero-animate-4 {
+  opacity: 0;
+  animation: hero-slide-up 0.6s ease-out 0.55s forwards;
+}
+.hero-animate-5 {
+  opacity: 0;
+  animation: hero-slide-up 0.6s ease-out 0.65s forwards;
+}
+.hero-animate-photo {
+  opacity: 0;
+  animation: hero-scale-in 0.8s ease-out 0.3s forwards;
+}
 
 /* ── Floating decorative shapes ── */
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50%       { transform: translateY(-20px) rotate(3deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(3deg);
+  }
 }
 @keyframes float-delayed {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50%       { transform: translateY(-15px) rotate(-2deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(-2deg);
+  }
 }
-.animate-float         { animation: float 6s ease-in-out infinite; }
-.animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+}
 
 /* ── Photo glow pulse ── */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.4; }
-  50%       { opacity: 0.85; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
 }
-.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
 
 /* ── Reduced motion accessibility ── */
 @media (prefers-reduced-motion: reduce) {
-  .hero-animate-1, .hero-animate-2, .hero-animate-3,
-  .hero-animate-4, .hero-animate-5, .hero-animate-photo {
+  .hero-animate-1,
+  .hero-animate-2,
+  .hero-animate-3,
+  .hero-animate-4,
+  .hero-animate-5,
+  .hero-animate-photo {
     animation: none;
     opacity: 1;
   }
-  .animate-float, .animate-float-delayed, .animate-pulse-slow {
+  .animate-float,
+  .animate-float-delayed,
+  .animate-pulse-slow {
     animation: none;
   }
 }
 
-/* ── Scroll-reveal animations ── */
-[data-animate] {
-  opacity: 0;
-  transition: opacity 0.6s ease, transform 0.6s ease;
+/* ── Touch target floor ──
+   Measured at 390px: 46 of 69 interactive elements on the homepage were under 44x44 —
+   header icon buttons at 36x36, project-card actions at 113x29, tab triggers at 29px
+   tall. Lighthouse passes those because WCAG 2.2 AA only asks for 24x24; 44x44 is the
+   Apple HIG and WCAG 2.5.5 AAA figure, and it is the one that matches a thumb.
+
+   Gated on `pointer: coarse` so this is a real layout change on touch devices and no
+   change at all on a mouse — a desktop toolbar of 44px icon buttons would be a visual
+   redesign, which is out of scope. Padding rather than height on the inline links, so the
+   text position does not move. */
+@media (pointer: coarse) {
+  [data-slot="button"],
+  [data-slot="tabs-trigger"],
+  [data-slot="select-trigger"],
+  [data-slot="form-control"],
+  input:not([type="hidden"]),
+  select,
+  textarea {
+    min-block-size: 44px;
+  }
+
+  /* Icon-only controls are square, so they need the inline axis too. */
+  [data-slot="button"]:is(.size-6, .size-8, .size-9, .size-10) {
+    min-inline-size: 44px;
+  }
+
+  /* The header's logo link wraps an SVG with no padding of its own. */
+  nav a[aria-label$="home"] {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  /* The contact block's icon rows come out at 40px from their h-10 icon alone.
+     Not applied to the project-title links: those are inline links inside a heading,
+     which WCAG 2.5.5 exempts, and padding them out would break the text flow. */
+  address a {
+    min-block-size: 44px;
+  }
 }
-[data-animate="fadeInUp"] {
+
+/* ── Scroll-reveal animations ──
+   Every rule below is scoped to `.js`, which `app/layout.tsx` sets on <html> in a blocking
+   inline script before first paint. The starting state of the reveal is `opacity: 0`, and
+   only `AnimatedSection`'s IntersectionObserver ever clears it — so unscoped, a failure to
+   run JavaScript leaves every section on the page permanently invisible. That is not
+   hypothetical: it is what a full-page screenshot, a print to PDF, and any renderer that
+   does not run the observer already saw.
+
+   Arming the hidden state from JS itself means the no-JS path renders the finished page
+   and simply never animates, which is the correct degradation. */
+.js [data-animate] {
+  opacity: 0;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.js [data-animate="fadeInUp"] {
   transform: translateY(24px);
 }
-[data-animate="slideInLeft"] {
+.js [data-animate="slideInLeft"] {
   transform: translateX(-24px);
 }
-[data-animate="scaleIn"] {
+.js [data-animate="scaleIn"] {
   transform: scale(0.92);
 }
-[data-animate].in-view {
+.js [data-animate].in-view {
   opacity: 1;
   transform: none;
 }
-[data-delay="100"] { transition-delay: 100ms; }
-[data-delay="200"] { transition-delay: 200ms; }
-[data-delay="300"] { transition-delay: 300ms; }
-[data-delay="400"] { transition-delay: 400ms; }
-[data-delay="500"] { transition-delay: 500ms; }
-[data-delay="600"] { transition-delay: 600ms; }
+
+/* Someone who asked for less motion still has to be able to read the page. This has to
+   beat the rules above, which is what the `!important` is for — `AnimatedSection` also
+   skips observing entirely in that case, so `.in-view` may never be added. */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-animate],
+  [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+.js [data-delay="100"] {
+  transition-delay: 100ms;
+}
+.js [data-delay="200"] {
+  transition-delay: 200ms;
+}
+.js [data-delay="300"] {
+  transition-delay: 300ms;
+}
+.js [data-delay="400"] {
+  transition-delay: 400ms;
+}
+.js [data-delay="500"] {
+  transition-delay: 500ms;
+}
+.js [data-delay="600"] {
+  transition-delay: 600ms;
+}

@@ -22,6 +22,15 @@ export function AnimatedSection({
     const el = ref.current;
     if (!el) return;
 
+    // Someone who asked for less motion gets the finished state immediately. The CSS
+    // already forces it, but adding the class keeps the DOM honest for anything reading
+    // `.in-view` — and there is no reason to hold an observer open for a reveal that
+    // will never animate.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.classList.add("in-view");
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -29,7 +38,7 @@ export function AnimatedSection({
           observer.unobserve(el);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(el);
@@ -37,12 +46,7 @@ export function AnimatedSection({
   }, []);
 
   return (
-    <div
-      ref={ref}
-      data-animate={animation}
-      data-delay={delay}
-      className={cn(className)}
-    >
+    <div ref={ref} data-animate={animation} data-delay={delay} className={cn(className)}>
       {children}
     </div>
   );

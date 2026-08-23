@@ -15,8 +15,8 @@ You search local memory files to retrieve previously captured knowledge — patt
 
 | Priority | Location | Contents |
 |----------|----------|----------|
-| 1 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/MEMORY.md` | High-level index (always in context) |
-| 2 | `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md` | Detailed topic files |
+| 1 | `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/MEMORY.md` | High-level index (always in context) |
+| 2 | `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/*.md` | Detailed topic files |
 | 3 | `.claude/skills/**/*.md` | Coding convention rules |
 
 ## When to Retrieve
@@ -39,7 +39,7 @@ From the user's query or current task, identify:
 
 ### Step 2: Search
 1. **Check MEMORY.md** — Scan for relevant sections
-2. **Search memory topic files** — Grep `~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/*.md`
+2. **Search memory topic files** — Grep `~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/*.md`
 
 ### Step 3: Present Results
 

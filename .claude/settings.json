@@ -6,12 +6,16 @@
       "Bash(pnpm build*)",
       "Bash(pnpm format*)",
       "Bash(pnpm dlx shadcn@latest add*)",
-      "Bash(python3 ~/.claude/skills/local-llm/scripts/llm.py*)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(git show*)",
-      "Bash(git blame*)"
+      "Bash(git blame*)",
+      "Bash(python3 ~/.claude/skills/local-llm/scripts/gemma.py*)",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm exec wrangler*)",
+      "Bash(pnpm exec opennextjs-cloudflare*)"
     ],
     "deny": [
       "Bash(git add*)",
@@ -24,6 +28,18 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/scripts/graphify-freshness.sh\"",
+            "timeout": 30,
+            "statusMessage": "Checking graphify freshness..."
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
@@ -36,6 +52,16 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=$(jq -r '.tool_input.command // empty'); case \"$cmd\" in *'git pull'*|*'git merge'*|*'git checkout'*|*'git switch'*) exec \"$CLAUDE_PROJECT_DIR/.claude/scripts/graphify-freshness.sh\" ;; esac",
+            "timeout": 30
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
@@ -62,18 +88,27 @@
   "mcpServers": {
     "exa": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.exa.ai/mcp"],
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.exa.ai/mcp"
+      ],
       "env": {
-        "EXA_API_KEY": "1a3e1337-f9a9-4324-a0c5-a41133b40bf5"
+        "EXA_API_KEY": "${EXA_API_KEY}"
       }
     },
     "sequential-thinking": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
     },
     "browsermcp": {
       "command": "npx",
-      "args": ["@browsermcp/mcp@latest"]
+      "args": [
+        "@browsermcp/mcp@latest"
+      ]
     }
   }
 }

@@ -12,7 +12,7 @@ Turn what was just figured out into a memory a future session will actually find
 Everything this skill writes lands in the project's Claude memory directory:
 
 ```
-~/.claude/projects/-home-shafin-ahmed-dev-projects-portfolio/memory/
+~/.claude/projects/-Users-shafin-dev-projects-portfolio/memory/
   MEMORY.md          # one-line index, loaded into context every session
   <slug>.md          # one memory per file
 ```

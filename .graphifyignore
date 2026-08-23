@@ -1,0 +1,37 @@
+# .graphifyignore — extra excludes for the Graphify knowledge graph.
+# Same syntax as .gitignore. Graphify already respects .gitignore automatically
+# (node_modules, .next, out, build, coverage are excluded there); this file only
+# adds MORE excludes — it can never re-include a git-ignored path.
+
+# Lockfiles — huge, generated, no code structure worth graphing.
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Locale message data (not code — key/value JSON).
+messages/
+
+# Static assets.
+public/
+
+# Agent / tooling config, not application code.
+.claude/
+.husky/
+skills/
+skills-lock.json
+plugins-mcp.md
+
+# Graphify's own output — never graph the graph.
+graphify-out/
+
+# Generated / vendored.
+next-env.d.ts
+*.min.js
+*.map
+
+# Local email preview renders (scripts/preview-emails.ts).
+.email-preview/
+
+# Local audit artifacts (chrome devtools screenshots, lighthouse reports).
+.audit/
