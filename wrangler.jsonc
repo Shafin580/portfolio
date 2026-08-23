@@ -73,10 +73,10 @@
 	// a Worker that does not exist yet, so the FIRST deploy must go out with this block
 	// commented out; add it back and redeploy once the Worker exists. `service` must match
 	// `name` above.
-	// "services": [
-	// 	{
-	// 		"binding": "WORKER_SELF_REFERENCE",
-	// 		"service": "portfolio"
-	// 	}
-	// ]
+	"services": [
+		{
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "portfolio"
+		}
+	]
 }
