@@ -31,6 +31,7 @@ import {
   type ContactInput,
 } from "@/lib/contact-schema";
 import { profile } from "@/lib/portfolio-data";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * The client half of the contact pipeline. Its server half is
@@ -93,6 +94,9 @@ export function ContactForm() {
       });
 
       if (response.ok) {
+        // Only the project type is reported. Name, email, company and the message
+        // body are personal data and must never reach Google Analytics.
+        trackEvent("generate_lead", { project_type: values.projectType });
         toast.success("Message sent!", {
           description: "Thanks for reaching out. I'll get back to you within 24 hours.",
         });
@@ -105,11 +109,13 @@ export function ContactForm() {
 
       // Not configured yet — this is a deployment state, not the visitor's problem.
       if (response.status === 503 || error === "not_configured") {
+        trackEvent("contact_not_configured");
         openMailto(values, "A pre-filled email has been prepared for you.");
         return;
       }
 
       if (response.status === 429) {
+        trackEvent("contact_rate_limited");
         toast.error("Too many messages", {
           description: `Please wait a few minutes, or email me directly at ${profile.email}`,
         });
@@ -118,6 +124,7 @@ export function ContactForm() {
       }
 
       if (error === "captcha_failed") {
+        trackEvent("contact_captcha_failed");
         toast.error("Verification failed", {
           description: "Please complete the verification again and resubmit.",
         });
@@ -127,6 +134,8 @@ export function ContactForm() {
 
       throw new Error(error ?? "submission_failed");
     } catch {
+      // Also reached on a network failure, which never produced a response above.
+      trackEvent("contact_failed");
       toast.error("Something went wrong", {
         description: `Please try again or email me directly at ${profile.email}`,
       });

@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import { AnimatedSection } from "@/components/animated-section";
 import { ContactForm } from "@/components/contact-form";
@@ -25,6 +24,7 @@ import { Faq } from "@/components/faq";
 import { ProjectMedia } from "@/components/project-media";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { TrackedLink } from "@/components/tracked-link";
 import {
   certification,
   education,
@@ -141,16 +141,24 @@ export default async function Home() {
                   {/* CTAs */}
                   <div className="hero-animate-5 flex flex-wrap gap-3 pt-1">
                     <Button size="lg" className="gap-2" asChild>
-                      <a href="#projects">
+                      <TrackedLink
+                        href="#projects"
+                        event="select_content"
+                        params={{ content_type: "hero_cta", item_id: "view_projects" }}
+                      >
                         View Projects
                         <ExternalLink className="h-4 w-4" />
-                      </a>
+                      </TrackedLink>
                     </Button>
                     <Button variant="outline" size="lg" className="gap-2" asChild>
-                      <a href="#contact">
+                      <TrackedLink
+                        href="#contact"
+                        event="select_content"
+                        params={{ content_type: "hero_cta", item_id: "hire_me" }}
+                      >
                         <Mail className="h-4 w-4" />
                         Hire Me
-                      </a>
+                      </TrackedLink>
                     </Button>
                   </div>
                 </div>
@@ -438,12 +446,18 @@ export default async function Home() {
                               <div className="flex flex-1 flex-col p-6">
                                 <h3 className="mb-2 text-lg font-semibold">
                                   {project.caseStudy ? (
-                                    <Link
+                                    <TrackedLink
                                       href={`/projects/${project.slug}`}
                                       className="hover:text-primary transition-colors"
+                                      event="select_content"
+                                      params={{
+                                        content_type: "case_study",
+                                        item_id: project.slug,
+                                        location: "card_title",
+                                      }}
                                     >
                                       {project.title}
-                                    </Link>
+                                    </TrackedLink>
                                   ) : (
                                     project.title
                                   )}
@@ -461,38 +475,56 @@ export default async function Home() {
                                 <div className="mt-auto flex flex-wrap gap-3">
                                   {project.caseStudy && (
                                     <Button size="sm" asChild>
-                                      <Link
+                                      <TrackedLink
                                         href={`/projects/${project.slug}`}
                                         aria-label={`Read the ${project.title} case study`}
+                                        event="select_content"
+                                        params={{
+                                          content_type: "case_study",
+                                          item_id: project.slug,
+                                          location: "card_button",
+                                        }}
                                       >
                                         Case study <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                                      </Link>
+                                      </TrackedLink>
                                     </Button>
                                   )}
                                   {/* Only rendered when the build-time ping says the site
                                     is actually reachable — see lib/link-status.ts. */}
                                   {isLive(project.live) && (
                                     <Button variant="outline" size="sm" asChild>
-                                      <a
+                                      <TrackedLink
                                         href={project.live!}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         aria-label={`Open the live ${project.title} site`}
+                                        event="click"
+                                        params={{
+                                          outbound: true,
+                                          item_id: project.slug,
+                                          location: "card_live",
+                                        }}
                                       >
                                         <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Live
-                                      </a>
+                                      </TrackedLink>
                                     </Button>
                                   )}
                                   {project.repo && (
                                     <Button variant="outline" size="sm" asChild>
-                                      <a
+                                      <TrackedLink
                                         href={project.repo}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         aria-label={`View the ${project.title} source on GitHub`}
+                                        event="click"
+                                        params={{
+                                          outbound: true,
+                                          item_id: project.slug,
+                                          location: "card_repo",
+                                        }}
                                       >
                                         <GithubIcon className="mr-1.5 h-3.5 w-3.5" /> Code
-                                      </a>
+                                      </TrackedLink>
                                     </Button>
                                   )}
                                 </div>
@@ -601,9 +633,13 @@ export default async function Home() {
                   </div>
 
                   <address className="space-y-4 not-italic">
-                    <a
+                    {/* A visitor who emails directly never reaches the form, so without
+                      this event they are invisible in the funnel. */}
+                    <TrackedLink
                       href={`mailto:${profile.email}`}
                       className="text-muted-foreground hover:text-foreground group flex min-w-0 items-center gap-3 text-sm [overflow-wrap:anywhere] transition-colors"
+                      event="click"
+                      params={{ method: "mailto", location: "contact" }}
                     >
                       <div
                         className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
@@ -612,12 +648,14 @@ export default async function Home() {
                         <Mail className="text-primary h-5 w-5" />
                       </div>
                       {profile.email}
-                    </a>
-                    <Link
+                    </TrackedLink>
+                    <TrackedLink
                       href={profile.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground group flex min-w-0 items-center gap-3 text-sm [overflow-wrap:anywhere] transition-colors"
+                      event="click"
+                      params={{ outbound: true, link_domain: "linkedin.com", location: "contact" }}
                     >
                       <div
                         className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
@@ -626,12 +664,14 @@ export default async function Home() {
                         <LinkedinIcon className="text-primary h-5 w-5" />
                       </div>
                       linkedin.com/in/shafin580
-                    </Link>
-                    <Link
+                    </TrackedLink>
+                    <TrackedLink
                       href={profile.github}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground group flex min-w-0 items-center gap-3 text-sm [overflow-wrap:anywhere] transition-colors"
+                      event="click"
+                      params={{ outbound: true, link_domain: "github.com", location: "contact" }}
                     >
                       <div
                         className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
@@ -640,7 +680,7 @@ export default async function Home() {
                         <GithubIcon className="text-primary h-5 w-5" />
                       </div>
                       github.com/Shafin580
-                    </Link>
+                    </TrackedLink>
                   </address>
 
                   <div className="pt-2">

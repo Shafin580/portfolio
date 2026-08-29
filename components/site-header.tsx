@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { GithubIcon, LinkedinIcon } from "@/components/brand-icons";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TrackedLink } from "@/components/tracked-link";
 import { navLinks, profile } from "@/lib/portfolio-data";
 
 /**
@@ -43,29 +44,43 @@ export function SiteHeader({ hrefPrefix = "" }: { hrefPrefix?: string }) {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <Button variant="ghost" size="icon" asChild>
-              <Link
+              <TrackedLink
                 href={profile.github}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${profile.name} on GitHub`}
+                event="click"
+                params={{ outbound: true, link_domain: "github.com", location: "header" }}
               >
                 <GithubIcon className="h-5 w-5" />
-              </Link>
+              </TrackedLink>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <Link
+              <TrackedLink
                 href={profile.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${profile.name} on LinkedIn`}
+                event="click"
+                params={{ outbound: true, link_domain: "linkedin.com", location: "header" }}
               >
                 <LinkedinIcon className="h-5 w-5" />
-              </Link>
+              </TrackedLink>
             </Button>
             <Button size="sm" className="hidden sm:inline-flex" asChild>
-              <a href={profile.resume} download>
+              {/*
+                `resume_download`, not `file_download` — GA4 enhanced measurement
+                already fires `file_download` automatically for .pdf, and reusing
+                the name would double-count every click.
+              */}
+              <TrackedLink
+                href={profile.resume}
+                download
+                event="resume_download"
+                params={{ location: "header" }}
+              >
                 <Download className="mr-2 h-4 w-4" /> Resume
-              </a>
+              </TrackedLink>
             </Button>
 
             {/* Mobile hamburger */}
@@ -89,9 +104,14 @@ export function SiteHeader({ hrefPrefix = "" }: { hrefPrefix?: string }) {
                   ))}
                   <Separator />
                   <Button className="w-full" asChild>
-                    <a href={profile.resume} download>
+                    <TrackedLink
+                      href={profile.resume}
+                      download
+                      event="resume_download"
+                      params={{ location: "mobile_menu" }}
+                    >
                       <Download className="mr-2 h-4 w-4" /> Resume
-                    </a>
+                    </TrackedLink>
                   </Button>
                 </nav>
               </SheetContent>

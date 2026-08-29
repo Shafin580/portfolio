@@ -68,6 +68,52 @@ packages measured 1,791,420 bytes gzipped inside the Worker, more than half the 
 plan script budget, for two POSTs. The tradeoff is that nothing escapes for you: **every
 interpolated request value goes through `esc()`** from [emails/shared.ts](emails/shared.ts).
 
+### Analytics (GA4)
+Hand-rolled, **zero dependencies** — no `@next/third-parties`, no gtag wrapper. Same rule
+that killed the `resend` SDK: an SDK is not free, and the loader here is `next/script`,
+which ships with Next. [lib/analytics.ts](lib/analytics.ts) is the one module every call
+site imports; nothing in it throws, and every entry point is truthiness-gated on
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` the way `contact-form.tsx` gates on the Turnstile site key.
+**Empty ID disables the whole feature** — no loader, no banner, no events.
+
+Four things here are load-bearing:
+
+- **`next/script` is correct for this, and the ban in *SEO / AEO / GEO* below does not
+  apply.** That ban exists because JSON-LD must be in the HTML crawlers receive. Analytics
+  is the opposite case: it must *not* run before hydration, which is what
+  `strategy="afterInteractive"` gives.
+- **Consent Mode v2 defaults are inlined in `<head>`** in [app/layout.tsx](app/layout.tsx),
+  after the `.js` classlist script, not via `next/script`. `dataLayer` is an ordered queue,
+  so commands pushed before gtag.js arrives are replayed when it loads — that is what lets
+  the loader stay `afterInteractive` while the consent defaults still land first. The
+  region-scoped default (EEA + UK + CH) is IP-resolved by Google and is **what actually
+  enforces denial**; [components/consent-banner.tsx](components/consent-banner.tsx) only
+  offers the opt-in, which is why its time-zone region guess is allowed to be approximate —
+  wrong in either direction fails safe.
+- **Never call `useSearchParams()` in anything the root layout renders.** Without a
+  `<Suspense>` boundary it bails every route out of static prerendering, and the four ISR
+  routes are the entire reason `open-next.config.ts` provisions an R2 incremental cache.
+  [components/page-view-tracker.tsx](components/page-view-tracker.tsx) uses `usePathname()`
+  alone and fires `page_view` itself, because the bootstrap sets `send_page_view: false`.
+- The resume event is **`resume_download`, not `file_download`** — GA4 enhanced measurement
+  already fires `file_download` automatically for `.pdf`, so reusing the name double-counts.
+
+[components/tracked-link.tsx](components/tracked-link.tsx) is the one tracked anchor. It
+spreads every prop and passes `ref` through, so it drops into ShadCN `<Button asChild>`
+(Radix `Slot`); it never calls `preventDefault`, so a blocked beacon costs a data point and
+never the visitor's click. **No personal data may be sent** — the contact-form
+`generate_lead` reports `project_type` only, never name, email, company, or message body.
+
+There is **no CSP anywhere in this repo**. If one is ever added it must allow
+`https://www.googletagmanager.com`.
+
+Google **Preferred Sources** is a plain deeplink in
+[components/site-footer.tsx](components/site-footer.tsx), built from `SITE_URL`. Google
+requires no structured data, meta tag, or Search Console setting for it; the only
+alternative is a `news.google.com` button script, deliberately not used — a fourth
+third-party origin on every page load to chase Top Stories placement a portfolio will never
+get.
+
 ### SEO / AEO / GEO
 **The `seo` skill (`.claude/skills/seo/SKILL.md`) is the authority here** — read it before
 changing any of the below. Its `references/json-ld-graph.md` documents both graphs
@@ -274,6 +320,7 @@ Two files, deliberately split — `.env` is **tracked in git** and `.env*.local`
 |---|---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | `.env` | Build variable | Canonical origin; fallback in `lib/site.ts` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | `.env` | Build variable | Public by design — the widget needs it in the browser |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | `.env.local` | Build variable | GA4 `G-…`. Public, but kept out of git so a fork cannot pollute the property — the one public value not in `.env`. **Build variable, never a Worker `var`** — `NEXT_PUBLIC_*` are inlined at build time, so a runtime var does nothing. Workers Builds never sees `.env.local`, so without the Build variable production renders identically and collects nothing. Empty disables analytics entirely |
 | `TURNSTILE_SECRET_KEY` | `.env.local` | `wrangler secret put` | **Never** prefix `NEXT_PUBLIC_` |
 | `RESEND_API_KEY` | `.env.local` | `wrangler secret put` | **Never** prefix `NEXT_PUBLIC_` |
 | `CONTACT_TO_EMAIL` | `.env.local` | `vars` in `wrangler.jsonc` | Where enquiries land |

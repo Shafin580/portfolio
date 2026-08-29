@@ -25,6 +25,7 @@ import { GithubIcon } from "@/components/brand-icons";
 import { ProjectMedia } from "@/components/project-media";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { TrackedLink } from "@/components/tracked-link";
 import { checkLinks } from "@/lib/link-status";
 import { BreadcrumbTrail } from "@/components/breadcrumb-trail";
 import { Faq } from "@/components/faq";
@@ -234,38 +235,48 @@ export default async function ProjectCaseStudyPage({
                 <div className="mt-8 flex flex-wrap gap-3">
                   {isLive && (
                     <Button asChild>
-                      <a
+                      <TrackedLink
                         href={project.live!}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Open the live ${project.title} site`}
+                        event="click"
+                        params={{ outbound: true, item_id: project.slug, location: "study_live" }}
                       >
                         <ExternalLink className="mr-1.5 h-4 w-4" /> Visit live site
-                      </a>
+                      </TrackedLink>
                     </Button>
                   )}
                   {study.externalCaseStudy && (
                     <Button variant="outline" asChild>
-                      <a
+                      <TrackedLink
                         href={study.externalCaseStudy}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Read the client's own write-up of ${project.title}`}
+                        event="click"
+                        params={{
+                          outbound: true,
+                          item_id: project.slug,
+                          location: "study_client_writeup",
+                        }}
                       >
                         <ExternalLink className="mr-1.5 h-4 w-4" /> Client write-up
-                      </a>
+                      </TrackedLink>
                     </Button>
                   )}
                   {project.repo && (
                     <Button variant="outline" asChild>
-                      <a
+                      <TrackedLink
                         href={project.repo}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`View the ${project.title} source on GitHub`}
+                        event="click"
+                        params={{ outbound: true, item_id: project.slug, location: "study_repo" }}
                       >
                         <GithubIcon className="mr-1.5 h-4 w-4" /> Source
-                      </a>
+                      </TrackedLink>
                     </Button>
                   )}
                 </div>
@@ -411,14 +422,20 @@ export default async function ProjectCaseStudyPage({
                   <ul className="space-y-3">
                     {study.sources.map((source) => (
                       <li key={source.url} className="text-sm">
-                        <a
+                        <TrackedLink
                           href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:text-primary decoration-muted-foreground/40 font-medium underline underline-offset-4 transition-colors"
+                          event="click"
+                          params={{
+                            outbound: true,
+                            item_id: project.slug,
+                            location: "study_reference",
+                          }}
                         >
                           {source.label}
-                        </a>
+                        </TrackedLink>
                         {source.publisher !== source.label && (
                           <span className="text-muted-foreground"> — {source.publisher}</span>
                         )}
@@ -493,14 +510,30 @@ export default async function ProjectCaseStudyPage({
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <Button asChild>
-                  <Link href="/#contact">
+                  <TrackedLink
+                    href="/#contact"
+                    event="select_content"
+                    params={{
+                      content_type: "case_study_cta",
+                      item_id: project.slug,
+                      link_id: "get_in_touch",
+                    }}
+                  >
                     <Mail className="mr-1.5 h-4 w-4" /> Get in touch
-                  </Link>
+                  </TrackedLink>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/#projects">
+                  <TrackedLink
+                    href="/#projects"
+                    event="select_content"
+                    params={{
+                      content_type: "case_study_cta",
+                      item_id: project.slug,
+                      link_id: "see_more_work",
+                    }}
+                  >
                     See more work <ArrowRight className="ml-1.5 h-4 w-4" />
-                  </Link>
+                  </TrackedLink>
                 </Button>
               </div>
             </div>

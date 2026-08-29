@@ -1,12 +1,44 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { ConsentBanner } from "@/components/consent-banner";
+import { PageViewTracker } from "@/components/page-view-tracker";
 import { profile } from "@/lib/portfolio-data";
+import { CONSENT_DENIED_REGIONS, CONSENT_KEY, GA_ID } from "@/lib/analytics";
 import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+
+/**
+ * Consent Mode v2 defaults plus the gtag queue, inlined ahead of gtag.js.
+ *
+ * `dataLayer` is an ordered queue, so commands pushed before the library arrives
+ * are replayed in order once it does. That is what lets the loader stay
+ * `afterInteractive` while the consent defaults still land first — which they
+ * must, or the first hit leaves before the visitor's region has been considered.
+ *
+ * The region-scoped default is written first and the global one second purely as
+ * documentation; Google resolves the most specific matching region regardless of
+ * order.
+ *
+ * No request data reaches this string — every interpolated value is a build-time
+ * env var or a constant in this repo. `js()` still hardens each one, because
+ * `dangerouslySetInnerHTML` performs no escaping of its own and `JSON.stringify`
+ * does not escape `<`: without this, a measurement ID containing `</script>`
+ * would close the tag early and turn a build-config typo into injected markup.
+ */
+const js = (value: unknown) => JSON.stringify(value ?? null).replace(/</g, "\\u003c");
+
+const consentBootstrap = `window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments)}
+gtag('js',new Date());
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:${js(CONSENT_DENIED_REGIONS)}});
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+try{var c=localStorage.getItem(${js(CONSENT_KEY)});if(c==='granted'||c==='denied')gtag('consent','update',{analytics_storage:c})}catch(e){}
+gtag('config',${js(GA_ID)},{send_page_view:false});`;
 
 const title = `${profile.name} — ${profile.title}`;
 
@@ -128,11 +160,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `document.documentElement.classList.add('js')`,
           }}
         />
+        {GA_ID && <script dangerouslySetInnerHTML={{ __html: consentBootstrap }} />}
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster richColors position="top-right" />
+          {GA_ID && (
+            <>
+              {/*
+                `next/script` is correct here, unlike for JSON-LD. The ban noted in
+                CLAUDE.md exists because structured data must be in the HTML crawlers
+                receive; analytics is the opposite case — it should not run until
+                after hydration, which is exactly what `afterInteractive` gives.
+              */}
+              <Script
+                id="ga-loader"
+                strategy="afterInteractive"
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              />
+              <PageViewTracker />
+              <ConsentBanner />
+            </>
+          )}
         </ThemeProvider>
       </body>
     </html>
