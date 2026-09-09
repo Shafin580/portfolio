@@ -238,6 +238,7 @@ opus.
 
 | Skill | What it enforces |
 |-------|-----------------|
+| `karpathy-guidelines` | Scope and stopping discipline — think before coding, simplicity first, surgical diffs, verifiable success criteria, and their precedence over the elegance and bug-fix rules |
 | `frontend` | ShadCN imports, `cn()` usage, oklch dark-mode tokens, no inline styles, `"use client"` rules |
 | `seo` | **The authority on SEO/AEO/GEO/OG.** Metadata contract, JSON-LD graph shape, citation and entity rules, satori/OG-card constraints |
 | `code-review` | Structured review checklist and report format |
@@ -285,6 +286,7 @@ in that skill is closed. Always review the output. Verification for this repo:
 - **Verification Before Done:** Never mark a task complete without proving it works. Run build/lint, check output, and demonstrate correctness. Ask yourself: "Would a staff engineer approve this?"
 - **Demand Elegance (Balanced):** For non-trivial changes, pause and ask "is there a more elegant way?" If a fix feels hacky, implement the elegant solution instead. Skip this for simple, obvious fixes.
 - **Autonomous Bug Fixing:** When given a bug report, just fix it. Point at logs/errors, then resolve them.
+- **Precedence:** *Core Principles* below outrank this section wherever they disagree — see that section for how.
 
 # Task Management
 
@@ -297,8 +299,12 @@ in that skill is closed. Always review the output. Verification for this repo:
 
 # Core Principles
 
-- **Simplicity First:** Make every change as simple as possible. Impact minimal code.
+- **Think before coding.** State the assumption in one line and proceed. Stop and ask only when two readings of the request would produce materially different work. Say so when a simpler approach exists, and name what is confusing instead of guessing past it.
+- **Simplicity first.** The minimum code that solves the asked problem — nothing speculative, no feature that was not requested, no abstraction for a single call site, no unrequested configurability, no error handling for impossible states. If 200 lines could be 50, rewrite. Test: would a senior engineer call this overcomplicated?
+- **Surgical changes.** Touch only what the request touches, and match the style already there. Do not reformat, rename, or refactor adjacent working code — report it instead. Do remove the imports, variables, and functions your own change orphaned. Test: every changed line traces to the request.
+- **Goal-driven execution.** Name the verifiable success criterion before editing, then loop until it passes. The loop exits on the verification rule at the top of this file plus a read of the diff. There is no test suite in this repo; list every check you did not execute as a manual step.
 - **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
+- **Precedence.** The four above decide how far a change may reach. *Demand Elegance*, *Autonomous Bug Fixing*, and *Verification Before Done* under **Agent Behavior & Execution Rules** apply only inside the surface the request already touches; *No Laziness* decides what to fix, *Surgical changes* decides how far the diff may reach. The repo invariants still outrank all of them — the contact-gate order, `esc()`, JSON-LD as a plain `<script>`, the 3 MiB script budget, and the `seo` skill's authority. On a trivial task use judgment, not ceremony. Long form and examples: the `karpathy-guidelines` skill.
 
 # Frontend Conventions
 
