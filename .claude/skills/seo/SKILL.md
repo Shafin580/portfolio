@@ -31,6 +31,9 @@ Work that satisfies only the first is incomplete.
 4. **Dead links never appear in schema or in `llms.txt`.** Everything outbound goes through
    `checkLinks()` in `lib/link-status.ts` first. Its failure classification is deliberate:
    only DNS failure, connection refused, and 4xx-5xx count as dead; timeouts **fail open**.
+   **One exception:** marketplace listings in `services[].offers` (Upwork, Fiverr, Kwork).
+   Upwork and Fiverr answer every server-side fetch with 403, so the ping would strip them
+   all. They are checked by hand, and `servicesCheckedDate` records when.
 5. **`export const revalidate` must match `LINK_CHECK_REVALIDATE`.** Next requires a
    literal, so the two are kept in sync by hand — on the page *and* on every route handler
    that calls `checkLinks`.

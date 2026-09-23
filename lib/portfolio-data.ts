@@ -6,6 +6,8 @@
  * drifting away from what a human actually sees on the page.
  */
 
+import { SITE_URL } from "./site";
+
 export interface Job {
   role: string;
   company: string;
@@ -122,6 +124,53 @@ export interface Project {
   schemaType: "SoftwareApplication" | "WebSite" | "CreativeWork";
   /** `null` means card-only — no detail page is generated. */
   caseStudy: CaseStudy | null;
+}
+
+/** A marketplace Shafin sells fixed-price services on. */
+export type Platform = "upwork" | "fiverr" | "kwork";
+
+/** One live marketplace listing for a service. */
+export interface PlatformOffer {
+  platform: Platform;
+  /** The listing title exactly as the marketplace shows it. */
+  title: string;
+  /** The live listing URL — checked by hand, see `servicesCheckedDate`. */
+  url: string;
+  /** Starting price in USD, as listed. */
+  fromPrice: number;
+  /** Set when `fromPrice` is not the listing's cheapest package. */
+  priceNote?: string;
+}
+
+/**
+ * A freelance service and its live marketplace listings.
+ *
+ * Every claim here traces to the approved gig copy and the resume — the same
+ * rule as the case studies. `proof` sentences stand alone because an answer
+ * engine quotes the sentence, not the section.
+ */
+export interface Service {
+  /** URL segment for `/services/<slug>`. */
+  slug: string;
+  /** Short label for cards, breadcrumbs and lists. */
+  name: string;
+  /** Page `<h1>` and `<title>`. */
+  headline: string;
+  /** Completes "Where can I hire Shafin Ahmed to …?" in the generated FAQ. */
+  task: string;
+  /** One or two answer-first sentences that name Shafin Ahmed. */
+  summary: string;
+  deliverables: string[];
+  proof: string[];
+  stacks: string[];
+  /** Case-study slugs shown as related work. */
+  relatedProjects: string[];
+  offers: PlatformOffer[];
+  /** Feeds both the rendered accordion and the page's `FAQPage` node. */
+  faqs: Faq[];
+  keywords: string[];
+  /** ISO 8601. Drives schema `dateModified` and the sitemap's `lastmod`. */
+  updatedDate: string;
 }
 
 export const profile = {
@@ -884,10 +933,557 @@ export const certification = {
   dateISO: "2020-03",
 } as const;
 
+/** Display order for platforms everywhere on the site. */
+export const platforms: readonly Platform[] = ["upwork", "fiverr", "kwork"];
+
+export const platformProfiles: Record<Platform, { name: string; url: string }> = {
+  upwork: { name: "Upwork", url: "https://www.upwork.com/freelancers/~0143c72f0e37725770" },
+  fiverr: { name: "Fiverr", url: "https://www.fiverr.com/shafin580" },
+  kwork: { name: "Kwork", url: "https://kwork.com/user/shafinwork580" },
+};
+
+/**
+ * When the listing URLs and starting prices below were last checked against
+ * the live marketplaces.
+ *
+ * They are checked by hand rather than by `checkLinks()`: Upwork and Fiverr
+ * answer any server-side fetch with 403, which the build-time ping would read
+ * as "dead" and silently strip every listing. Re-check on every price change.
+ */
+export const servicesCheckedDate = "2026-09-23";
+
+const serviceList: Service[] = [
+  {
+    slug: "nextjs-saas-dashboard",
+    name: "Next.js SaaS dashboard",
+    headline: "Next.js SaaS & Admin Dashboard Development",
+    task: "build a Next.js SaaS or admin dashboard",
+    summary:
+      "Shafin Ahmed builds Next.js admin and SaaS dashboards with login, role-based access, data tables, charts and forms, wired to your REST or GraphQL API.",
+    deliverables: [
+      "Next.js (App Router) and TypeScript, styled with Tailwind CSS and ShadCN UI",
+      "Login, sign-up and protected routes, with role-based access in the larger packages",
+      "Data tables with sorting, filtering and pagination; charts; forms with validation",
+      "Server state with TanStack Query, wired to your REST or GraphQL API, or to a typed mock API until your backend is ready",
+      "On Fiverr and Kwork, an optional Laravel or NestJS backend with PostgreSQL and Docker",
+      "A responsive layout, full source code and a handoff README",
+    ],
+    proof: [
+      "Shafin Ahmed built the front end of HumR, a multi-company HR platform: 3 Next.js apps, 7 modules and 4 personas on shared Turborepo packages.",
+      "On HumR, Shafin Ahmed implemented single sign-on over middleware-shared encrypted cookies, so users move across 7 modules and 4 permission roles without logging in again.",
+      "Oporajita, the real-time data and collaboration dashboard Shafin Ahmed worked on for The Asia Foundation, serves 15 partner organisations and went from UX to deployment in 8 weeks.",
+    ],
+    stacks: ["Next.js", "TypeScript", "Tailwind CSS", "ShadCN UI", "TanStack Query", "Laravel", "NestJS", "PostgreSQL"],
+    relatedProjects: ["humr", "oporajita"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a Next.js admin or SaaS dashboard with auth and roles",
+        url: "https://www.upwork.com/services/product/development-it-a-next-js-admin-or-saas-dashboard-with-auth-and-roles-2101234870345223244",
+        fromPrice: 250,
+      },
+      {
+        platform: "fiverr",
+        title: "I will build your nextjs saas dashboard or full stack web app with laravel",
+        url: "https://www.fiverr.com/shafin580/build-your-nextjs-saas-dashboard-or-full-stack-web-app-with-laravel",
+        fromPrice: 250,
+      },
+      {
+        platform: "kwork",
+        title: "I will build a Next.js SaaS dashboard with auth and roles",
+        url: "https://kwork.com/web-development/54811589/i-will-build-a-next-js-saas-dashboard-with-auth-and-roles",
+        fromPrice: 260,
+      },
+    ],
+    faqs: [
+      {
+        question: "What if the API for my Next.js dashboard is not ready yet?",
+        answer:
+          "Shafin Ahmed builds the dashboard against a typed mock API, then switches it to the real endpoints once they exist.",
+      },
+      {
+        question: "Which authentication does Shafin Ahmed support in a Next.js dashboard?",
+        answer:
+          "The API's own auth (JWT or session cookies), or a provider such as NextAuth. Single sign-on across subdomains is possible and is scoped before the work starts.",
+      },
+      {
+        question: "Does the Next.js dashboard service include a backend?",
+        answer:
+          "The Upwork dashboard project is the front end on an existing API; for API, database and front end together, Shafin Ahmed's full-stack MVP service fits. The Fiverr and Kwork dashboard packages can add a Laravel or NestJS backend with PostgreSQL.",
+      },
+    ],
+    keywords: ["Next.js dashboard developer", "SaaS dashboard", "admin panel", "React dashboard", "role-based access"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "full-stack-mvp",
+    name: "Full-stack MVP",
+    headline: "Full-Stack MVP Development: Next.js + Laravel",
+    task: "build a full-stack MVP",
+    summary:
+      "Shafin Ahmed builds full-stack MVPs: a Next.js front end, a Laravel or NestJS API and a PostgreSQL database, Dockerised and deployed to your own server or cloud.",
+    deliverables: [
+      "A Next.js and TypeScript front end styled with Tailwind CSS",
+      "A Laravel or NestJS REST API with validation and authentication",
+      "A PostgreSQL schema with migrations and seed data",
+      "Docker Compose for local development, plus deployment to your server or cloud",
+      "Full source code, a README and API documentation",
+      "A scope built around the one workflow your first users must complete, delivered in milestones you approve",
+    ],
+    proof: [
+      "Shafin Ahmed built Bullwip, a UK rental onboarding platform, full stack on Next.js, Laravel, PostgreSQL and Elasticsearch, with resumable multi-party onboarding.",
+      "Shafin Ahmed built Datafast, a desktop data-automation platform, from scratch on Laravel, Next.js, Electron and Puppeteer.",
+      "At ARITS Limited, Shafin Ahmed cut deployment time by 50% through Docker and standard CI/CD.",
+    ],
+    stacks: ["Next.js", "TypeScript", "Laravel", "NestJS", "PostgreSQL", "Docker", "Tailwind CSS"],
+    relatedProjects: ["humr", "oporajita"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a full-stack MVP web app in Next.js, Laravel and PostgreSQL",
+        url: "https://www.upwork.com/services/product/development-it-a-full-stack-mvp-web-app-in-next-js-laravel-and-postgresql-2101237006820925011",
+        fromPrice: 750,
+      },
+      {
+        platform: "fiverr",
+        title: "I will build your nextjs saas dashboard or full stack web app with laravel",
+        url: "https://www.fiverr.com/shafin580/build-your-nextjs-saas-dashboard-or-full-stack-web-app-with-laravel",
+        fromPrice: 750,
+        priceNote: "Standard package",
+      },
+      {
+        platform: "kwork",
+        title: "I will build your MVP: Next.js, Laravel or NestJS, PostgreSQL",
+        url: "https://kwork.com/web-development/54812125/i-will-build-your-mvp-next-js-laravel-or-nestjs-postgresql",
+        fromPrice: 750,
+      },
+    ],
+    faqs: [
+      {
+        question: "Should an MVP use Laravel or NestJS?",
+        answer:
+          "Shafin Ahmed defaults to Laravel because it is fastest for CRUD-heavy MVPs, and uses NestJS for teams that want TypeScript end to end. He recommends one after reading the scope.",
+      },
+      {
+        question: "Where is an MVP built by Shafin Ahmed hosted?",
+        answer:
+          "On any VPS or cloud that runs Docker. Shafin Ahmed deploys it to an account the client owns.",
+      },
+      {
+        question: "What happens after the MVP launches?",
+        answer:
+          "The client keeps the full source code and documentation. Further changes can be a new project or an hourly contract.",
+      },
+    ],
+    keywords: ["MVP development", "full-stack developer", "Next.js Laravel", "SaaS MVP", "PostgreSQL"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "headless-wordpress-nextjs",
+    name: "Headless WordPress + Next.js",
+    headline: "Headless WordPress + Next.js Website Development",
+    task: "build a headless WordPress website with Next.js",
+    summary:
+      "Shafin Ahmed builds headless WordPress websites: content stays editable in WordPress while visitors get a fast Next.js front end with technical SEO built in.",
+    deliverables: [
+      "WordPress set up as a headless CMS with WPGraphQL, ACF fields and custom post types for your content",
+      "A Next.js front end in TypeScript and Tailwind CSS with static generation, so pages load fast",
+      "Technical SEO: metadata, Open Graph, XML sitemap, robots.txt, and structured data in the larger packages",
+      "Responsive layouts for mobile, tablet and desktop",
+      "Existing posts and pages moved across, when the content can be exported",
+      "Deployment to your hosting, full source code and a handoff guide",
+    ],
+    proof: [
+      "Shafin Ahmed moved calternatives.org to headless WordPress and Next.js, producing a 65% improvement in search visibility and 70% faster development.",
+      "Shafin Ahmed rebuilt arits.tech on headless WordPress with GraphQL and ACF, producing a 45% improvement in search performance.",
+      "Shafin Ahmed also built sheraa.network on headless WordPress, ACF and Next.js, and shaathi.com.bd on Next.js with a headless CMS.",
+    ],
+    stacks: ["WordPress", "WPGraphQL", "ACF", "Next.js", "TypeScript", "Tailwind CSS"],
+    relatedProjects: ["calternatives", "arits", "sheraa", "shaathi"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a headless WordPress + Next.js site with GraphQL and SEO",
+        url: "https://www.upwork.com/services/product/development-it-headless-wordpress-setup-with-graphql-integration-for-next-js-frontend-1835976753455998632",
+        fromPrice: 300,
+      },
+      {
+        platform: "fiverr",
+        title: "I will build a fast headless wordpress website with nextjs and technical SEO",
+        url: "https://www.fiverr.com/shafin580/build-a-fast-headless-wordpress-website-with-nextjs-and-technical-seo",
+        fromPrice: 200,
+      },
+      {
+        platform: "kwork",
+        title: "I will build a headless WordPress site on Next.js and GraphQL",
+        url: "https://kwork.com/web-development/54811166/i-will-build-a-headless-wordpress-site-on-next-js-and-graphql",
+        fromPrice: 200,
+      },
+    ],
+    faqs: [
+      {
+        question: "What is a headless WordPress website?",
+        answer:
+          "A headless WordPress website keeps WordPress as the place where content is edited, while visitors see a separate Next.js front end that is faster and easier to optimise for search.",
+      },
+      {
+        question: "What does Shafin Ahmed need to start a headless WordPress build?",
+        answer:
+          "The content and images, a design or 2–3 reference sites, and access to the WordPress hosting and domain.",
+      },
+      {
+        question: "Can an existing WordPress site be moved to headless?",
+        answer:
+          "Yes, if its content can be exported. Shafin Ahmed reviews the current site first to scope the move.",
+      },
+    ],
+    keywords: ["headless WordPress developer", "WordPress Next.js", "WPGraphQL", "headless CMS", "Next.js website"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "nextjs-speed-seo-aeo",
+    name: "Next.js speed, SEO & AEO/GEO",
+    headline: "Next.js Speed Optimization, Technical SEO, AEO & GEO",
+    task: "speed up a Next.js site and fix its technical SEO, AEO and GEO",
+    summary:
+      "Shafin Ahmed audits and fixes slow Next.js and React sites: Core Web Vitals, technical SEO, and readiness for answer and generative engines (AEO and GEO) through JSON-LD schema, FAQ answers, AI crawler rules and llms.txt.",
+    deliverables: [
+      "A Lighthouse and Core Web Vitals audit (LCP, INP, CLS) of your key pages",
+      "A technical SEO check: metadata, headings, canonical URLs, sitemap, robots.txt and structured data",
+      "Fixes in your codebase: image and font loading, bundle size and rendering strategy (SSG/SSR)",
+      "AEO and GEO fixes in the larger packages: JSON-LD schema, FAQ sections with FAQPage schema, AI crawler access rules and an llms.txt file",
+      "A measured before/after report and a pull request you can review",
+    ],
+    proof: [
+      "Shafin Ahmed's technical SEO work on calternatives.org produced a 65% improvement in search visibility.",
+      "Shafin Ahmed's rebuild of arits.tech produced a 45% improvement in search performance.",
+      "shadev-tech.com, Shafin Ahmed's own site, ships the same AEO and GEO setup: linked JSON-LD, FAQ answers, named AI crawlers in robots.txt, and llms.txt.",
+    ],
+    stacks: ["Next.js", "React", "Lighthouse", "Core Web Vitals", "JSON-LD", "llms.txt"],
+    relatedProjects: ["calternatives", "arits"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a faster Next.js or React site with Core Web Vitals, SEO, AEO and GEO fixes",
+        url: "https://www.upwork.com/services/product/development-it-a-faster-next-js-or-react-site-with-core-web-vitals-seo-aeo-and-geo-fixes-2101231128061380261",
+        fromPrice: 150,
+      },
+      {
+        platform: "fiverr",
+        title: "I will speed up your nextjs site and fix core web vitals, technical SEO and aeo",
+        url: "https://www.fiverr.com/shafin580/speed-up-your-nextjs-site-and-fix-core-web-vitals-technical-seo-and-aeo",
+        fromPrice: 65,
+      },
+      {
+        platform: "kwork",
+        title: "I will fix Next.js speed, technical SEO and AI search readiness",
+        url: "https://kwork.com/website-revision/54839128/i-will-fix-next-js-speed-technical-seo-and-ai-search-readiness",
+        fromPrice: 70,
+      },
+    ],
+    faqs: [
+      {
+        question: "What are AEO and GEO?",
+        answer:
+          "AEO (answer engine optimization) shapes pages so search engines and assistants can lift direct answers from them. GEO (generative engine optimization) makes content easy for AI models to read, trust and cite.",
+      },
+      {
+        question: "Can Shafin Ahmed guarantee a Lighthouse score, rankings or AI citations?",
+        answer:
+          "No one honestly can: hosting, third-party scripts, content and reputation all play a part. Every engagement includes a measured before/after report, and every fix is explained.",
+      },
+      {
+        question: "Does a Next.js speed audit need access to the code?",
+        answer:
+          "The audit-only package needs just the public URL. Fixes need repository access (GitHub or GitLab) and a way to deploy a preview.",
+      },
+      {
+        question: "Does the speed and SEO service cover WordPress or Shopify themes?",
+        answer:
+          "No. Shafin Ahmed's speed and SEO service is for Next.js and React code; other stacks are discussed before ordering.",
+      },
+    ],
+    keywords: ["Next.js speed optimization", "Core Web Vitals", "technical SEO", "answer engine optimization", "generative engine optimization"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "nextjs-react-laravel-bug-fix",
+    name: "Bug fixing, incl. AI-built apps",
+    headline: "Next.js, React & Laravel Bug Fixing",
+    task: "fix a bug in a Next.js, React or Laravel app",
+    summary:
+      "Shafin Ahmed finds the root cause of bugs in Next.js, React and Laravel apps, including apps generated with AI tools, fixes them in your codebase and explains what went wrong.",
+    deliverables: [
+      "The bug reproduced exactly as you see it, and its root cause found",
+      "A tested fix, delivered as a pull request or patch",
+      "A short written report: what broke, why, and what changed",
+      "A note on anything related spotted along the way",
+    ],
+    proof: [
+      "Shafin Ahmed has 4+ years of production experience with Next.js, React and Laravel at ARITS Limited.",
+      "Shafin Ahmed has built 12+ complex responsive UIs in Next.js and TypeScript, with a reusable component library.",
+    ],
+    stacks: ["Next.js", "React", "TypeScript", "Laravel", "Node.js", "PostgreSQL", "Supabase"],
+    relatedProjects: ["humr"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get your Next.js, React or Laravel bugs fixed, with the root cause explained",
+        url: "https://www.upwork.com/services/product/development-it-your-next-js-react-or-laravel-bugs-fixed-with-the-root-cause-explained-2101146139378550437",
+        fromPrice: 75,
+      },
+      {
+        platform: "fiverr",
+        title: "I will fix bugs in your ai generated or vibe coded nextjs or react app",
+        url: "https://www.fiverr.com/shafin580/fix-bugs-in-your-ai-generated-or-vibe-coded-nextjs-or-react-app",
+        fromPrice: 35,
+      },
+      {
+        platform: "kwork",
+        title: "I will fix a bug in your Next.js, React or Laravel app",
+        url: "https://kwork.com/website-revision/54796353/i-will-fix-a-bug-in-your-next-js-react-or-laravel-app",
+        fromPrice: 80,
+      },
+    ],
+    faqs: [
+      {
+        question: "Can Shafin Ahmed fix an app built with an AI tool such as Cursor, Lovable, Bolt or v0?",
+        answer:
+          "Yes, when the code is Next.js, React or Laravel, including apps on Supabase. Shafin Ahmed finds where the generated code goes wrong, fixes it properly and notes what changed.",
+      },
+      {
+        question: "What happens if a bug fix needs more time than the package covers?",
+        answer:
+          "Shafin Ahmed stops and sends an estimate first. Nothing extra happens without the client's approval.",
+      },
+      {
+        question: "How is the code shared for a bug fix?",
+        answer:
+          "Through an invitation to the GitHub, GitLab or Bitbucket repository; most AI app builders can export to GitHub. Passwords and API keys should stay out of chat.",
+      },
+    ],
+    keywords: ["Next.js bug fix", "React bug fix", "Laravel bug fix", "fix AI-generated code", "vibe-coded app fix"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "nextjs-landing-page",
+    name: "Landing page from Figma",
+    headline: "Figma to Next.js Landing Page Development",
+    task: "turn a Figma design into a Next.js landing page",
+    summary:
+      "Shafin Ahmed turns a Figma design, or 2–3 reference sites, into a fast, responsive Next.js landing page or small business site with SEO basics, deployed to your hosting.",
+    deliverables: [
+      "A Next.js (App Router) and TypeScript build styled with Tailwind CSS",
+      "Sections, spacing and typography matched closely to your design",
+      "Responsive layouts down to 360px, with hover and scroll effects where the design shows them",
+      "SEO basics: metadata, Open Graph tags and fast static pages",
+      "Deployment, a live link, full source code and a short README",
+    ],
+    proof: [
+      "Shafin Ahmed has built 12+ complex responsive UIs in Next.js and TypeScript, with a reusable component library.",
+      "Shafin Ahmed built tazcreates.site, a single-page Next.js 16 commission site on Cloudflare Workers with Tailwind CSS v4 and a Turnstile-gated form.",
+      "Shafin Ahmed built shaathi.com.bd, an SEO-first Next.js website for the Shaathi Foundation.",
+    ],
+    stacks: ["Next.js", "TypeScript", "Tailwind CSS", "Figma"],
+    relatedProjects: ["tazcreates", "shaathi"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a responsive Next.js landing page built from your Figma design",
+        url: "https://www.upwork.com/services/product/development-it-a-responsive-next-js-landing-page-built-from-your-figma-design-2101147943557949171",
+        fromPrice: 150,
+      },
+      {
+        platform: "kwork",
+        title: "I will build a fast Next.js landing page or business site",
+        url: "https://kwork.com/web-development/54802018/i-will-build-a-fast-next-js-landing-page-or-business-site",
+        fromPrice: 140,
+      },
+    ],
+    faqs: [
+      {
+        question: "Does Shafin Ahmed need a Figma design to build a landing page?",
+        answer:
+          "No. Shafin Ahmed can work from 2–3 reference sites and the client's content, though a Figma design gives the most accurate result.",
+      },
+      {
+        question: "How closely does the Next.js build match the Figma design?",
+        answer:
+          "Layout, spacing, colours and type are matched closely. If the design has no mobile version, Shafin Ahmed adapts it and shows the result before delivery.",
+      },
+      {
+        question: "Is copywriting included in the landing page service?",
+        answer:
+          "No. The client supplies the text, or the page is built with clear placeholders to replace later.",
+      },
+    ],
+    keywords: ["Figma to Next.js", "Next.js landing page", "Figma to React", "landing page developer", "Tailwind CSS"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "stripe-payments-integration",
+    name: "Stripe payments integration",
+    headline: "Stripe Payments Integration for Next.js & Laravel",
+    task: "integrate Stripe payments into a Next.js or Laravel app",
+    summary:
+      "Shafin Ahmed integrates Stripe into Next.js and Laravel apps: one-time Checkout, subscriptions with trials and the Customer Portal, and signature-verified webhooks, all on your own Stripe account.",
+    deliverables: [
+      "Stripe Checkout for one-time payments, with success and cancel pages",
+      "Webhooks verified by signature, so your database stays in sync with Stripe",
+      "Subscriptions with plans, trials and the Stripe Customer Portal (Standard package and up)",
+      "Stripe Connect payouts or invoicing, scoped with you first (Advanced package)",
+      "A test-mode walkthrough, full source code and a setup guide",
+    ],
+    proof: [
+      "Shafin Ahmed has shipped Stripe payments, notification and messaging integrations, and encrypted data transactions in a microservice architecture.",
+    ],
+    stacks: ["Stripe", "Next.js", "TypeScript", "Laravel"],
+    relatedProjects: [],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get Stripe payments in your Next.js or Laravel app: one-time or subscriptions",
+        url: "https://www.upwork.com/services/product/development-it-stripe-payments-in-your-next-js-or-laravel-app-one-time-or-subscriptions-2101149571258746533",
+        fromPrice: 150,
+      },
+    ],
+    faqs: [
+      {
+        question: "Does a Stripe integration need the client's own Stripe account?",
+        answer:
+          "Yes, and the account stays the client's. Shafin Ahmed works in test mode until the client approves, then the client switches to live keys; API keys go into environment settings, never into chat.",
+      },
+      {
+        question: "Is card data stored on the app's server with Stripe Checkout?",
+        answer:
+          "No. Stripe Checkout keeps card details on Stripe; the app stores only IDs and payment statuses.",
+      },
+      {
+        question: "Which stacks does Shafin Ahmed support for Stripe integrations?",
+        answer:
+          "Next.js (App Router, TypeScript) and Laravel. Other stacks are discussed before ordering.",
+      },
+    ],
+    keywords: ["Stripe integration", "Stripe subscriptions", "Next.js Stripe", "Laravel Stripe", "payment gateway"],
+    updatedDate: servicesCheckedDate,
+  },
+  {
+    slug: "nextjs-portfolio-website",
+    name: "Portfolio website",
+    headline: "Next.js Portfolio Website Development",
+    task: "build a Next.js portfolio website",
+    summary:
+      "Shafin Ahmed builds fast Next.js portfolio websites with a project gallery, a spam-protected contact form and SEO basics, deployed to your own domain.",
+    deliverables: [
+      "A Next.js and TypeScript site styled with Tailwind CSS",
+      "A clean gallery or project grid with fast-loading images",
+      "A contact or commission form protected from spam bots (Standard package and up)",
+      "SEO basics: page titles, descriptions and social sharing previews",
+      "An editable CMS in the Advanced package",
+      "Deployment to your domain, full source code and a short README",
+    ],
+    proof: [
+      "Shafin Ahmed built tazcreates.site, a commission site for a portrait artist in Canada, on Next.js 16 and Cloudflare Workers with a Turnstile-gated commission form.",
+      "Shafin Ahmed has built 12+ complex responsive UIs in Next.js and TypeScript, with a reusable component library.",
+    ],
+    stacks: ["Next.js", "TypeScript", "Tailwind CSS"],
+    relatedProjects: ["tazcreates", "shaathi"],
+    offers: [
+      {
+        platform: "upwork",
+        title: "You will get a fast Next.js portfolio website to showcase your work",
+        url: "https://www.upwork.com/services/product/development-it-a-fast-next-js-portfolio-website-to-showcase-your-work-2101228507687740224",
+        fromPrice: 180,
+      },
+    ],
+    faqs: [
+      {
+        question: "Does a portfolio website need a design first?",
+        answer:
+          "No. Shafin Ahmed works from 2–3 sites the client likes plus their content, and proposes a clean layout before building.",
+      },
+      {
+        question: "Can the owner update a portfolio website without a developer?",
+        answer:
+          "Yes. In the Starter and Standard packages the work lives in one simple content file; the Advanced package adds a CMS for editing without code.",
+      },
+      {
+        question: "Can the portfolio website use its owner's domain?",
+        answer:
+          "Yes. Shafin Ahmed connects the domain during deployment, and the owner keeps full ownership of it.",
+      },
+    ],
+    keywords: ["Next.js portfolio", "portfolio website", "personal website", "artist website", "React portfolio"],
+    updatedDate: servicesCheckedDate,
+  },
+];
+
+/** "$750 (Standard package)" — the one formatter for a listing's starting price. */
+export function formatOfferPrice(offer: PlatformOffer): string {
+  return `$${offer.fromPrice.toLocaleString("en-US")}${offer.priceNote ? ` (${offer.priceNote})` : ""}`;
+}
+
+/** Cheapest listed starting price for a service, across every platform. */
+export function serviceFromPrice(service: Service): number {
+  return Math.min(...service.offers.map((offer) => offer.fromPrice));
+}
+
+/**
+ * Each service leads its FAQ with a "where can I hire" answer generated from
+ * its offers, so the prices quoted in the FAQ (and its `FAQPage` node) can
+ * never disagree with the listing cards on the same page.
+ */
+export const services: Service[] = serviceList.map((service) => ({
+  ...service,
+  faqs: [
+    {
+      question: `Where can I hire Shafin Ahmed to ${service.task}?`,
+      answer: `On ${service.offers
+        .map((offer) => `${platformProfiles[offer.platform].name} (from ${formatOfferPrice(offer)})`)
+        .join(", ")}, as a fixed-price package. Direct links to each listing are at ${SITE_URL}/services/${service.slug}.`,
+    },
+    ...service.faqs,
+  ],
+}));
+
+/** The `/services` hub's `<h1>` and the answer-first paragraph under it. */
+export const servicesIntro = {
+  headline: "Freelance Next.js & Full-Stack Services",
+  summary:
+    "Shafin Ahmed is a full-stack software engineer in Dhaka, Bangladesh who sells fixed-price Next.js, Laravel and headless WordPress services on Upwork, Fiverr and Kwork. Each service below lists what is included and links to its live marketplace listings.",
+} as const;
+
+/** FAQ for the `/services` hub — rendered there and emitted as its `FAQPage`. */
+export const servicesFaqs: Faq[] = [
+  {
+    question: "Can I hire Shafin Ahmed on Upwork, Fiverr or Kwork?",
+    answer: `Yes. Shafin Ahmed sells fixed-price services on Upwork, Fiverr and Kwork. Every service page at ${SITE_URL}/services links to its live listing on each platform, with the starting price.`,
+  },
+  {
+    question: "Which platform should I use to hire Shafin Ahmed?",
+    answer:
+      "Whichever one you already use. The work is the same everywhere; package sizes and prices differ slightly between platforms, and messaging and payment stay on the platform you choose.",
+  },
+  {
+    question: "How much does it cost to hire Shafin Ahmed?",
+    answer: `Fixed-price packages start from $${Math.min(...services.map(serviceFromPrice))}, and each service page lists the current starting price on every platform. For work outside a package, Shafin Ahmed sends a custom offer.`,
+  },
+  {
+    question: "Can I contact Shafin Ahmed directly instead of through a marketplace?",
+    answer: `Yes, through the contact form at ${SITE_URL}/#contact. Work that starts on a marketplace stays on that marketplace.`,
+  },
+  {
+    question: "Does Shafin Ahmed use AI tools?",
+    answer:
+      "Shafin Ahmed uses AI-assisted tools for drafting and coding speed-ups, and personally scopes, reviews, tests and stands behind everything he delivers.",
+  },
+];
+
 export const navLinks = [
   { label: "About", href: "#about" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
+  { label: "Services", href: "#services" },
   { label: "FAQ", href: "#faq" },
   { label: "Contact", href: "#contact" },
 ];
@@ -910,7 +1506,13 @@ export const faqs: Faq[] = [
   {
     question: "Is Shafin Ahmed available for hire?",
     answer:
-      "Yes — he is open to new opportunities and project work. The fastest route is email at shafinwork580@gmail.com or the contact form on this site; he responds within 24 hours. He is also reachable on LinkedIn at linkedin.com/in/shafin580.",
+      "Yes — he is open to new opportunities and project work. The fastest route is email at shafinwork580@gmail.com or the contact form on this site; he responds within 24 hours. He is also reachable on LinkedIn at linkedin.com/in/shafin580, and sells fixed-price services on Upwork, Fiverr and Kwork.",
+  },
+  {
+    question: "What services does Shafin Ahmed offer?",
+    answer: `Shafin Ahmed offers fixed-price freelance services: ${services
+      .map((service) => service.name)
+      .join(", ")}. Each one is available on Upwork, Fiverr or Kwork, and ${SITE_URL}/services links to every live listing with its starting price.`,
   },
   {
     question: "What has Shafin Ahmed built?",

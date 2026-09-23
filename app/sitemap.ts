@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { caseStudyProjects } from "@/lib/portfolio-data";
+import { caseStudyProjects, services } from "@/lib/portfolio-data";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 /**
@@ -7,7 +7,8 @@ import { absoluteUrl, SITE_URL } from "@/lib/site";
  *
  * A `lastmod` that changes on every build is a `lastmod` crawlers learn to
  * ignore — it claims the whole site changed every time CI ran. Each case study
- * reports its own `updatedDate`, and the root reports the newest of them.
+ * and service reports its own `updatedDate`; the root and the services hub
+ * report the newest of the entries they list.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const projectEntries = caseStudyProjects.map((project) => ({
@@ -17,8 +18,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const newest = caseStudyProjects
-    .map((project) => project.caseStudy!.updatedDate)
+  const serviceEntries = services.map((service) => ({
+    url: absoluteUrl(`/services/${service.slug}`),
+    lastModified: new Date(service.updatedDate),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  const newestService = services
+    .map((service) => service.updatedDate)
+    .sort()
+    .at(-1);
+
+  const newest = [...caseStudyProjects.map((project) => project.caseStudy!.updatedDate), newestService]
+    .filter((date): date is string => Boolean(date))
     .sort()
     .at(-1);
 
@@ -29,6 +42,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
+    {
+      url: absoluteUrl("/services"),
+      lastModified: newestService ? new Date(newestService) : undefined,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    ...serviceEntries,
     ...projectEntries,
   ];
 }

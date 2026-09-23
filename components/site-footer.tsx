@@ -1,5 +1,7 @@
+import Link from "next/link";
+
 import { TrackedLink } from "@/components/tracked-link";
-import { profile } from "@/lib/portfolio-data";
+import { platformProfiles, platforms, profile } from "@/lib/portfolio-data";
 import { SITE_URL } from "@/lib/site";
 
 /**
@@ -16,11 +18,32 @@ import { SITE_URL } from "@/lib/site";
  */
 const PREFERRED_SOURCE_URL = `https://www.google.com/preferences/source?q=${new URL(SITE_URL).hostname}`;
 
-/** Shared footer for the homepage and the project case-study pages. */
+/** Shared footer for the homepage, the case-study pages and the service pages. */
 export function SiteFooter() {
   return (
     <footer className="border-t py-8 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav
+          aria-label="Hire me"
+          className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground sm:justify-start"
+        >
+          <Link href="/services" className="hover:text-foreground font-medium transition-colors">
+            Services
+          </Link>
+          {platforms.map((platform) => (
+            <TrackedLink
+              key={platform}
+              href={platformProfiles[platform].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+              event="click"
+              params={{ outbound: true, item_id: platform, location: "footer_platform" }}
+            >
+              Hire on {platformProfiles[platform].name}
+            </TrackedLink>
+          ))}
+        </nav>
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} {profile.name}. All rights reserved.</p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">

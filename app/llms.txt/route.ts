@@ -3,8 +3,13 @@ import {
   education,
   experience,
   faqs,
+  formatOfferPrice,
+  platformProfiles,
+  platforms,
   profile,
   projects,
+  services,
+  servicesCheckedDate,
   skills,
 } from "@/lib/portfolio-data";
 import { checkLinks, LINK_CHECK_REVALIDATE } from "@/lib/link-status";
@@ -52,6 +57,18 @@ export async function GET() {
     ([category, items]) => `- **${category}**: ${items.join(", ")}`,
   );
 
+  // Marketplace listings are checked by hand, not by `checkLinks` — Upwork and
+  // Fiverr answer server-side fetches with 403. See `servicesCheckedDate`.
+  const serviceLines = services.map(
+    (service) =>
+      `- **[${service.name}](${SITE_URL}/services/${service.slug})** — ${service.summary} Listings: ${service.offers
+        .map(
+          (offer) =>
+            `[${platformProfiles[offer.platform].name}, from ${formatOfferPrice(offer)}](${offer.url})`,
+        )
+        .join(", ")}. (plain text: [${service.name}, plain text](${SITE_URL}/services/${service.slug}/llms.txt))`,
+  );
+
   const faqLines = faqs.map((faq) => `### ${faq.question}\n${faq.answer}`);
 
   const body = `# ${profile.name} — ${profile.title}
@@ -64,6 +81,12 @@ ${profile.name} is a full-stack software engineer based in ${profile.locality}, 
 - Email: [${profile.email}](mailto:${profile.email})
 - GitHub: [${profile.name} on GitHub](${profile.github})
 - LinkedIn: [${profile.name} on LinkedIn](${profile.linkedin})
+${platforms
+  .map(
+    (platform) =>
+      `- ${platformProfiles[platform].name}: [${profile.name} on ${platformProfiles[platform].name}](${platformProfiles[platform].url})`,
+  )
+  .join("\n")}
 - Website: [${profile.name} — portfolio](${SITE_URL})
 - Location: ${profile.locality}, ${profile.countryName} (available for remote and international work)
 - Status: open to new opportunities and project work
@@ -77,6 +100,10 @@ ${experienceLines.join("\n\n")}
 ## Projects
 ${projectLines.join("\n")}
 
+## Services
+Fixed-price freelance services, hireable on Upwork, Fiverr and Kwork. Hub: [Freelance services by ${profile.name}](${SITE_URL}/services). Listings and starting prices checked ${servicesCheckedDate}.
+${serviceLines.join("\n")}
+
 ## Education
 - **${education.degree}**, ${education.institution} (${education.period}), GPA ${education.gpa}. Thesis: ${education.thesis}.
 - **${certification.name}**, ${certification.issuer} (${certification.date}).
@@ -87,7 +114,7 @@ ${faqLines.join("\n\n")}
 ## Machine-readable resources
 - Sitemap: ${SITE_URL}/sitemap.xml
 - Robots: ${SITE_URL}/robots.txt
-- JSON-LD: embedded in the HTML of ${SITE_URL} as a schema.org @graph (Person, Organization, WebSite, ProfilePage, ItemList, FAQPage)
+- JSON-LD: embedded in the HTML of ${SITE_URL} as a schema.org @graph (Person with OfferCatalog, Organization, WebSite, ProfilePage, ItemList, FAQPage); each service page carries a Service with one Offer per marketplace listing
 - Resume (PDF): ${SITE_URL}${encodeURI(profile.resume)}
 `;
 

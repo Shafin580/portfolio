@@ -4,10 +4,15 @@ import {
   education,
   experience,
   faqs,
+  platformProfiles,
+  platforms,
   profile,
   projects,
+  services,
+  servicesFaqs,
   type NamedEntity,
   type Project,
+  type Service,
 } from "@/lib/portfolio-data";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 import type { LinkState } from "@/lib/link-status";
@@ -28,6 +33,26 @@ const ORG_ID = `${SITE_URL}/#arits`;
 
 /** Canonical `@id` for a project, so the homepage list and its own page agree. */
 const projectId = (project: Project) => `${SITE_URL}/projects/${project.slug}#project`;
+
+/** Canonical `@id` for a service — shared by its own page, the hub list and the Person's catalog. */
+const serviceId = (service: Service) => `${SITE_URL}/services/${service.slug}#service`;
+
+const SERVICES_URL = absoluteUrl("/services");
+
+/**
+ * A service as a reference-able stub: enough for a list or catalog to name it,
+ * with the full node (offers, provider, FAQ) living on the service's own page
+ * under the same `@id`.
+ */
+function serviceStub(service: Service) {
+  return {
+    "@type": "Service",
+    "@id": serviceId(service),
+    name: service.name,
+    url: absoluteUrl(`/services/${service.slug}`),
+    provider: { "@id": PERSON_ID },
+  };
+}
 
 /**
  * Stable `@id` for a named organisation, derived from its official URL.
@@ -191,6 +216,141 @@ export function buildProjectStructuredData(project: Project, isLive: boolean) {
   };
 }
 
+/** The Person as a stub — the full profile lives on the homepage graph. */
+const personStub = {
+  "@type": "Person",
+  "@id": PERSON_ID,
+  name: profile.name,
+  jobTitle: profile.title,
+  url: SITE_URL,
+};
+
+function faqPageNode(pageUrl: string, items: readonly { question: string; answer: string }[]) {
+  return {
+    "@type": "FAQPage",
+    "@id": `${pageUrl}#faq`,
+    isPartOf: { "@id": `${pageUrl}#webpage` },
+    mainEntity: items.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
+}
+
+/**
+ * The `@graph` for a single `/services/<slug>` page.
+ *
+ * The `Service` carries one `Offer` per live marketplace listing, each with the
+ * listing URL and its starting price as `minPrice` — the same `offers` array
+ * the page renders as cards. The breadcrumb mirrors the visible trail.
+ */
+export function buildServiceStructuredData(service: Service) {
+  const pageUrl = absoluteUrl(`/services/${service.slug}`);
+  const related = projects.filter(
+    (project) => project.caseStudy && service.relatedProjects.includes(project.slug),
+  );
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      personStub,
+      {
+        ...serviceStub(service),
+        serviceType: service.name,
+        description: service.summary,
+        areaServed: "Worldwide",
+        availableLanguage: ["English", "Bengali"],
+        keywords: service.keywords.join(", "),
+        offers: service.offers.map((offer) => ({
+          "@type": "Offer",
+          name: `${platformProfiles[offer.platform].name}: ${offer.title}`,
+          url: offer.url,
+          priceSpecification: {
+            "@type": "PriceSpecification",
+            minPrice: offer.fromPrice,
+            priceCurrency: "USD",
+          },
+          seller: { "@id": PERSON_ID },
+        })),
+        mainEntityOfPage: { "@id": `${pageUrl}#webpage` },
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: service.headline,
+        description: service.summary,
+        dateModified: service.updatedDate,
+        isPartOf: { "@id": WEBSITE_ID },
+        about: { "@id": serviceId(service) },
+        author: { "@id": PERSON_ID },
+        breadcrumb: { "@id": `${pageUrl}#breadcrumb` },
+        ...(related.length
+          ? { relatedLink: related.map((project) => absoluteUrl(`/projects/${project.slug}`)) }
+          : {}),
+        inLanguage: "en",
+        speakable: {
+          "@type": "SpeakableSpecification",
+          cssSelector: ["[data-speakable='summary']", "[data-speakable='proof']"],
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${pageUrl}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Services", item: SERVICES_URL },
+          { "@type": "ListItem", position: 3, name: service.name, item: pageUrl },
+        ],
+      },
+      faqPageNode(pageUrl, service.faqs),
+    ],
+  };
+}
+
+/** The `@graph` for the `/services` hub: the list of services plus its FAQ. */
+export function buildServicesHubStructuredData() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      personStub,
+      {
+        "@type": "CollectionPage",
+        "@id": `${SERVICES_URL}#webpage`,
+        url: SERVICES_URL,
+        name: `Freelance services by ${profile.name}`,
+        isPartOf: { "@id": WEBSITE_ID },
+        about: { "@id": PERSON_ID },
+        author: { "@id": PERSON_ID },
+        mainEntity: { "@id": `${SERVICES_URL}#list` },
+        breadcrumb: { "@id": `${SERVICES_URL}#breadcrumb` },
+        inLanguage: "en",
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${SERVICES_URL}#list`,
+        name: `Freelance services by ${profile.name}`,
+        numberOfItems: services.length,
+        itemListElement: services.map((service, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: serviceStub(service),
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${SERVICES_URL}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Services", item: SERVICES_URL },
+        ],
+      },
+      faqPageNode(SERVICES_URL, servicesFaqs),
+    ],
+  };
+}
+
 export function buildStructuredData(linkStatus: Record<string, LinkState>) {
   const current = experience[0];
 
@@ -206,7 +366,11 @@ export function buildStructuredData(linkStatus: Record<string, LinkState>) {
         url: SITE_URL,
         email: `mailto:${profile.email}`,
         image: absoluteUrl(profile.photo),
-        sameAs: [profile.github, profile.linkedin],
+        sameAs: [
+          profile.github,
+          profile.linkedin,
+          ...platforms.map((platform) => platformProfiles[platform].url),
+        ],
         knowsAbout: allSkills,
         knowsLanguage: ["English", "Bengali"],
         address: {
@@ -255,6 +419,17 @@ export function buildStructuredData(linkStatus: Record<string, LinkState>) {
         workExample: projects.map((project) =>
           projectNode(project, Boolean(project.live) && linkStatus[project.live!] === "alive"),
         ),
+        // Mirrors the visible #services section; each Service's full node,
+        // offers included, lives on its own /services/<slug> page.
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: `Freelance services by ${profile.name}`,
+          url: SERVICES_URL,
+          itemListElement: services.map((service) => ({
+            "@type": "Offer",
+            itemOffered: serviceStub(service),
+          })),
+        },
       },
       {
         "@type": "Organization",

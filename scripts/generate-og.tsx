@@ -18,7 +18,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
-import { caseStudyProjects, profile } from "../lib/portfolio-data";
+import {
+  caseStudyProjects,
+  platformProfiles,
+  profile,
+  serviceFromPrice,
+  services,
+  servicesIntro,
+} from "../lib/portfolio-data";
 import { LOGO_DATA_URI } from "../lib/logo-svg";
 import { OG_SIZE, renderOgCard } from "../lib/og-card";
 
@@ -26,6 +33,8 @@ const OUT_DIR = path.join(process.cwd(), "public", "og");
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 
 const HIGHLIGHTS = ["Next.js", "TypeScript", "Laravel", "Docker", "AWS"];
+// Service names are too long for pills — satori does not reflow, so they overlap.
+const SERVICE_HIGHLIGHTS = ["Next.js", "Laravel", "Headless WordPress", "Stripe", "SEO & AEO"];
 
 async function write(target: string, response: Response) {
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -86,9 +95,35 @@ async function main() {
     );
   }
 
+  await write(
+    path.join(OUT_DIR, "services.png"),
+    await renderOgCard({
+      eyebrow: "Services",
+      title: servicesIntro.headline,
+      subtitle: `${profile.name} · Upwork, Fiverr, Kwork`,
+      body: servicesIntro.summary,
+      chips: SERVICE_HIGHLIGHTS,
+    }),
+  );
+
+  for (const service of services) {
+    await write(
+      path.join(OUT_DIR, `services-${service.slug}.png`),
+      await renderOgCard({
+        eyebrow: "Service",
+        title: service.headline,
+        subtitle: `${profile.name} · from $${serviceFromPrice(service).toLocaleString("en-US")} on ${service.offers
+          .map((offer) => platformProfiles[offer.platform].name)
+          .join(", ")}`,
+        body: service.summary,
+        chips: service.stacks.slice(0, 5),
+      }),
+    );
+  }
+
   await write(path.join(PUBLIC_DIR, "apple-icon.png"), appleIcon());
 
-  console.log(`Done — ${caseStudyProjects.length + 2} images.`);
+  console.log(`Done — ${caseStudyProjects.length + services.length + 3} images.`);
 }
 
 main().catch((err) => {

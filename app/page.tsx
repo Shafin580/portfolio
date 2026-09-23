@@ -21,6 +21,7 @@ import { AnimatedSection } from "@/components/animated-section";
 import { ContactForm } from "@/components/contact-form";
 import { GithubIcon, LinkedinIcon } from "@/components/brand-icons";
 import { Faq } from "@/components/faq";
+import { PlatformIcon } from "@/components/platform-icon";
 import { ProjectMedia } from "@/components/project-media";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -30,9 +31,13 @@ import {
   education,
   experience,
   personalProjects,
+  platformProfiles,
+  platforms,
   profile,
   professionalProjects,
   projects,
+  serviceFromPrice,
+  services,
   skills,
 } from "@/lib/portfolio-data";
 import { checkLinks } from "@/lib/link-status";
@@ -542,6 +547,77 @@ export default async function Home() {
 
           <Separator />
 
+          {/* ── Services ──
+              Mirrors the Person's `hasOfferCatalog` in the JSON-LD graph; each
+              card leads to a /services/<slug> page with the live listings. */}
+          <section id="services" className="py-20" aria-labelledby="services-heading">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <AnimatedSection animation="fadeInUp">
+                <h2 id="services-heading" className="mb-2 text-3xl font-bold">
+                  Services
+                </h2>
+                <p className="text-muted-foreground mb-10">
+                  Fixed-price packages you can order on Upwork, Fiverr and Kwork.
+                </p>
+              </AnimatedSection>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {services.map((service, index) => (
+                  <AnimatedSection
+                    key={service.slug}
+                    animation="scaleIn"
+                    delay={((index % 4) * 100 + 100) as 100 | 200 | 300 | 400}
+                  >
+                    <Card className="flex h-full flex-col gap-3 p-5 transition-shadow hover:shadow-lg">
+                      <h3 className="font-semibold">
+                        <TrackedLink
+                          href={`/services/${service.slug}`}
+                          className="hover:text-primary transition-colors"
+                          event="select_content"
+                          params={{
+                            content_type: "service",
+                            item_id: service.slug,
+                            location: "home_card",
+                          }}
+                        >
+                          {service.name}
+                        </TrackedLink>
+                      </h3>
+                      <p className="text-muted-foreground line-clamp-3 text-sm">{service.summary}</p>
+                      <p className="mt-auto text-sm">
+                        From{" "}
+                        <span className="font-bold">
+                          ${serviceFromPrice(service).toLocaleString("en-US")}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          on{" "}
+                          {service.offers
+                            .map((offer) => platformProfiles[offer.platform].name)
+                            .join(" · ")}
+                        </span>
+                      </p>
+                    </Card>
+                  </AnimatedSection>
+                ))}
+              </div>
+              <AnimatedSection animation="fadeInUp" delay={200}>
+                <div className="mt-8">
+                  <Button variant="outline" asChild>
+                    <TrackedLink
+                      href="/services"
+                      event="select_content"
+                      params={{ content_type: "services_hub", location: "home_section" }}
+                    >
+                      All services and live listings <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </TrackedLink>
+                  </Button>
+                </div>
+              </AnimatedSection>
+            </div>
+          </section>
+
+          <Separator />
+
           {/* ── Education & Certifications ── */}
           <section id="education" className="py-20">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -681,6 +757,25 @@ export default async function Home() {
                       </div>
                       github.com/Shafin580
                     </TrackedLink>
+                    {platforms.map((platform) => (
+                      <TrackedLink
+                        key={platform}
+                        href={platformProfiles[platform].url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-foreground group flex min-w-0 items-center gap-3 text-sm [overflow-wrap:anywhere] transition-colors"
+                        event="click"
+                        params={{ outbound: true, item_id: platform, location: "contact" }}
+                      >
+                        <div
+                          className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
+                          aria-hidden="true"
+                        >
+                          <PlatformIcon platform={platform} className="text-primary h-5 w-5" />
+                        </div>
+                        Hire me on {platformProfiles[platform].name}
+                      </TrackedLink>
+                    ))}
                   </address>
 
                   <div className="pt-2">
