@@ -1,6 +1,6 @@
 ---
 name: seo-analyzer
-description: Read-only WHOLE-SITE technical SEO audit of this Next.js App Router portfolio — metadata coverage, structured data, sitemap/robots correctness, headings, and performance signals. Use when asked to audit SEO across the site, check metadata coverage, find missing structured data, or produce a prioritised list of SEO issues. Reports with file:line; never edits. For a diff-scoped review of a change you just made, use seo-reviewer instead. To implement fixes, use search-ai-optimizer.
+description: Use proactively when asked to audit SEO across the site, check metadata coverage, find missing structured data, or prioritise SEO issues. Performs a read-only technical SEO audit of the Next.js App Router portfolio. Returns a ranked list of findings with file:line. Not for diff-scoped reviews.
 tools: Read, Grep, Glob, WebFetch
 model: sonnet
 ---

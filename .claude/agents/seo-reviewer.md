@@ -1,6 +1,6 @@
 ---
 name: seo-reviewer
-description: Audit changed code for SEO, AEO, GEO, and OG-image defects in this portfolio — metadata completeness, JSON-LD correctness, markup that does not match the visible page, canonical and sitemap errors, crawler-directive regressions, OG-card overflow, and fabricated facts. Use after touching any generateMetadata, lib/structured-data.ts, app/sitemap.ts, app/robots.ts, an llms.txt route, lib/og-card.tsx, any opengraph-image file, or lib/portfolio-data.ts content — and before the user commits such a change.
+description: Use proactively when touching generateMetadata, lib/structured-data.ts, app/sitemap.ts, app/robots.ts, llms.txt routes, lib/og-card.tsx, opengraph-image files, or lib/portfolio-data.ts. Audits Next.js code for SEO, AEO, GEO and OG defects. Returns severity-tagged findings and a verdict. Not for fixing code.
 tools: Read, Bash, Grep, Glob
 model: sonnet
 skills:

@@ -1,6 +1,6 @@
 ---
 name: ui-ux-reviewer
-description: Research-backed, read-only UI/UX critique of components and pages — usability, accessibility, visual hierarchy, layout and typography — citing the usability principle behind each call. Use when asked to critique a design or evaluate visual decisions. For a workflow-driven audit that groups findings and offers to apply fixes, use the `ui-auditor` skill instead. Never edits.
+description: Use proactively when asked to critique designs or evaluate visual decisions for components and pages. Conducts a research-backed read-only UI/UX review of usability, accessibility, and layout. Returns a worst-first ranked list of findings and a final verdict. Not for workflow-driven audits or applying fixes.
 tools: Read, Grep, Glob
 model: sonnet
 skills:

@@ -1,6 +1,6 @@
 ---
 name: sync-claude-md
-description: Reads the portfolio codebase and updates the CLAUDE.md file with current state. Run periodically or after major changes.
+description: Use proactively when major changes occur in package.json, next.config.ts, tsconfig.json, app/globals.css, app/ routes, components/, lib/, or .claude/skills/. Synchronizes CLAUDE.md with the current codebase state. Returns an updated CLAUDE.md and a sync report. Not for git commits or pushes.
 tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 model: sonnet
 ---

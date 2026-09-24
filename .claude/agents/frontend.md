@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: Senior frontend engineer for this Next.js portfolio site. Use for all React/TypeScript work — building components, pages, hooks, and styling.
+description: Use proactively when editing app/ or components/, styling with Tailwind v4, or updating lib/portfolio-data.ts. Builds the Next.js 16 portfolio site. Returns TSX/TS components, hooks, and styles. Not for state-changing git commands.
 tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 model: sonnet
 skills:

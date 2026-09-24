@@ -1,6 +1,6 @@
 ---
 name: search-ai-optimizer
-description: Implements SEO, Answer Engine Optimization (AEO), and Generative Engine Optimization (GEO) changes — schema markup, page metadata, llms.txt, FAQ blocks, content structuring for AI citation. Use when asked to improve search visibility, get cited by ChatGPT/Perplexity/Claude, add structured data, or act on an SEO audit. Edits files. For a read-only audit first, use seo-analyzer.
+description: Use proactively when asked to improve search visibility, get cited by AI, add structured data, or act on an SEO audit. Implements SEO, AEO, and GEO changes in lib/portfolio-data.ts and app routes. Returns a path:line change list and build verification. Not for read-only audits.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
 skills:

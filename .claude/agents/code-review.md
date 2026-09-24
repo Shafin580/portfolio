@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Reviews code changes for convention compliance, bugs, security, and quality. Use after writing code, before commits, or to audit specific files/modules. Produces structured review with verdict.
+description: Use proactively after writing code, before commits, or to audit specific files. Reviews Next.js 16 / React 19 / TypeScript / Tailwind v4 / ShadCN code for convention compliance, bugs, security and quality. Returns a structured report with a verdict. Not for SEO, AEO or GEO changes.
 tools: Read, Bash, Grep, Glob
 model: sonnet
 skills:

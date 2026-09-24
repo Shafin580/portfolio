@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Captures and records project knowledge into memory files. Use when discovering reusable patterns, design decisions, gotchas, or when the user says "learn this", "remember this pattern", "save this for later". This is the WRITE side of the knowledge system.
+description: Use proactively when user says learn this, remember this pattern, save this for later, or when discovering reusable patterns, design decisions, or gotchas. Records project knowledge into memory files. Returns updated memory files and a pointer in MEMORY.md. Not for one-off fixes or standard library usage.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
 skills:

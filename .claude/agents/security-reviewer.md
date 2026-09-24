@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Audit changed code for injection, XSS, secret exposure, email-relay abuse, and unvalidated boundary input in this Next.js portfolio (route handlers, the contact API, server components, metadata routes). Use after touching anything under app/api/**, app/**/route.ts, components/contact-form.tsx, lib/contact-schema.ts, lib/structured-data.ts, any dangerouslySetInnerHTML, or any env var — and before the user commits such a change.
+description: Use proactively when touching app/api/**, app/**/route.ts, components/contact-form.tsx, lib/contact-schema.ts, lib/structured-data.ts, dangerouslySetInnerHTML, or env vars. Audits changed code for injection, XSS, secret exposure, and email-relay abuse. Returns severity-tagged findings or a PASS verdict. Not for fixing code.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 skills:
