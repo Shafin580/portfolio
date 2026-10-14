@@ -3,6 +3,7 @@ name: knowledge
 description: Use proactively before any implementation task, or when asked about established patterns, decisions, gotchas or prior work on the portfolio. Retrieves learned project knowledge from the memory files and .claude/skills/. Returns relevant excerpts. Read-only; not for recording new knowledge (use learn).
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: medium
 skills:
   - knowledge
 ---

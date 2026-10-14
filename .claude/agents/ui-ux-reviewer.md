@@ -3,6 +3,7 @@ name: ui-ux-reviewer
 description: Use proactively when asked to critique designs or evaluate visual decisions for components and pages. Conducts a research-backed read-only UI/UX review of usability, accessibility, and layout. Returns a worst-first ranked list of findings and a final verdict. Not for workflow-driven audits or applying fixes.
 tools: Read, Grep, Glob
 model: sonnet
+effort: medium
 skills:
   - ui-ux-quality
   - frontend

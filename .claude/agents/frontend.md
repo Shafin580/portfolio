@@ -3,6 +3,7 @@ name: frontend
 description: Use proactively when editing app/ or components/, styling with Tailwind v4, or updating lib/portfolio-data.ts. Builds the Next.js 16 portfolio site. Returns TSX/TS components, hooks, and styles. Not for state-changing git commands.
 tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 model: sonnet
+effort: medium
 skills:
   - frontend
   - git

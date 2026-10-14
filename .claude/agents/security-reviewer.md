@@ -3,6 +3,7 @@ name: security-reviewer
 description: Use proactively when touching app/api/**, app/**/route.ts, components/contact-form.tsx, lib/contact-schema.ts, lib/structured-data.ts, dangerouslySetInnerHTML, or env vars. Audits changed code for injection, XSS, secret exposure, and email-relay abuse. Returns severity-tagged findings or a PASS verdict. Not for fixing code.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: high
 skills:
   - git
 ---

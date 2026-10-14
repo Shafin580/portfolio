@@ -3,6 +3,7 @@ name: search-ai-optimizer
 description: Use proactively when asked to improve search visibility, get cited by AI, add structured data, or act on an SEO audit. Implements SEO, AEO, and GEO changes in lib/portfolio-data.ts and app routes. Returns a path:line change list and build verification. Not for read-only audits.
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
+effort: medium
 skills:
   - seo
   - seo-optimizer

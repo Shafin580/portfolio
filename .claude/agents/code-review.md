@@ -3,6 +3,7 @@ name: code-review
 description: Use proactively after writing code, before commits, or to audit specific files. Reviews Next.js 16 / React 19 / TypeScript / Tailwind v4 / ShadCN code for convention compliance, bugs, security and quality. Returns a structured report with a verdict. Not for SEO, AEO or GEO changes.
 tools: Read, Bash, Grep, Glob
 model: sonnet
+effort: medium
 skills:
   - code-review
   - frontend

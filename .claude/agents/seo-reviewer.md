@@ -3,6 +3,7 @@ name: seo-reviewer
 description: Use proactively when touching generateMetadata, lib/structured-data.ts, app/sitemap.ts, app/robots.ts, llms.txt routes, lib/og-card.tsx, opengraph-image files, or lib/portfolio-data.ts. Audits Next.js code for SEO, AEO, GEO and OG defects. Returns severity-tagged findings and a verdict. Not for fixing code.
 tools: Read, Bash, Grep, Glob
 model: sonnet
+effort: medium
 skills:
   - seo
   - frontend

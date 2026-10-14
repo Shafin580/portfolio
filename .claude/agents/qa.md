@@ -3,6 +3,7 @@ name: qa
 description: Use proactively when testing, verifying bugs, auditing code quality, validating frontend changes, or troubleshooting pnpm build/lint errors. Performs QA for a Next.js 16, React 19, TS 5, Tailwind v4 site. Returns reports with Severity, Location, Issue, Evidence, Impact, and Fix. Not for state-changing git commands.
 tools: Read, Bash, Grep, Glob, Agent
 model: sonnet
+effort: medium
 skills:
   - frontend
   - git

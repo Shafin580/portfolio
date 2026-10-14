@@ -3,6 +3,7 @@ name: ui-ux-designer
 description: Use proactively when handling design decisions, layout architecture, accessibility audits, or responsive design for Next.js 16, Tailwind CSS v4 and ShadCN UI. Designs professional portfolio components. Returns component trees, states, responsiveness, accessibility and rationale. Not for research-cited critiques.
 tools: Read, Grep, Glob, Bash
 model: sonnet
+effort: high
 skills:
   - frontend
   - ui-auditor
