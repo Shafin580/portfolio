@@ -134,6 +134,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  // AdSense site verification for shadev-tech.com, which also covers its subdomains
+  // (e.g. sanchay.shadev-tech.com). The publisher id is public by design.
+  ...(process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID
+    ? { other: { "google-adsense-account": process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID } }
+    : {}),
 };
 
 export const viewport: Viewport = {
