@@ -259,7 +259,14 @@ export const projects: Project[] = [
     description:
       "Multi-company HR platform (humr.work) covering the full employment lifecycle across three Next.js apps that share one login. Built SSO across subdomains via encrypted cookie sharing, a Turborepo package graph, a dynamic form builder, and attendance clock in/out.",
     image: "/img/humr-image.png",
-    stacks: ["Next.js 16", "TypeScript", "Turborepo", "Cryptography", "TanStack Query", "ShadCN UI"],
+    stacks: [
+      "Next.js 16",
+      "TypeScript",
+      "Turborepo",
+      "Cryptography",
+      "TanStack Query",
+      "ShadCN UI",
+    ],
     // Dev environment, behind a login. Kept deliberately: the build-time ping in
     // lib/link-status.ts drops the button, the schema `sameAs`, and the llms.txt
     // line by itself if the host goes away, so a torn-down dev box cannot leave
@@ -337,7 +344,14 @@ export const projects: Project[] = [
     description:
       "Real-time data and collaboration dashboard for The Asia Foundation's Oporajita initiative, used by 15 partner organisations across Bangladesh's garment sector. Replaced scattered spreadsheets with one shared, standardised system.",
     image: "/img/oporajita.png",
-    stacks: ["Next.js", "TypeScript", "Service-Oriented Architecture", "Elasticsearch", "Docker", "TanStack Query"],
+    stacks: [
+      "Next.js",
+      "TypeScript",
+      "Service-Oriented Architecture",
+      "Elasticsearch",
+      "Docker",
+      "TanStack Query",
+    ],
     live: null,
     repo: null,
     category: "professional",
@@ -390,8 +404,7 @@ export const projects: Project[] = [
         },
         {
           question: "How long did Oporajita take to build?",
-          answer:
-            "An eight-week cycle, running from UX design through to deployment.",
+          answer: "An eight-week cycle, running from UX design through to deployment.",
         },
         {
           question: "What technology is Oporajita built on?",
@@ -411,10 +424,7 @@ export const projects: Project[] = [
           publisher: "The Asia Foundation",
         },
       ],
-      entities: [
-        { name: "The Asia Foundation", url: ASIA_FOUNDATION, role: "Client" },
-        ARITS,
-      ],
+      entities: [{ name: "The Asia Foundation", url: ASIA_FOUNDATION, role: "Client" }, ARITS],
       externalCaseStudy: "https://arits.tech/our-work/oporajita-web-application",
     },
   },
@@ -933,6 +943,294 @@ export const certification = {
   dateISO: "2020-03",
 } as const;
 
+export interface ResumeLink {
+  text: string;
+  url: string;
+}
+
+/** A bullet is plain text, or text interleaved with links (the HumR demo list). */
+export type ResumeBullet = string | readonly (string | ResumeLink)[];
+
+export interface ResumeEntry {
+  /** Role, project or degree. */
+  title: string;
+  /** Employer, institution, or the project's client and role line. */
+  subtitle?: string;
+  location?: string;
+  period: string;
+  url?: string;
+  stack?: readonly string[];
+  bullets: readonly ResumeBullet[];
+}
+
+/**
+ * Content of the web resume at `/resume`, transcribed from `public/files/main.tex`,
+ * the LaTeX source that generates the PDF at `profile.resume`. Edit the two together
+ * and bump `updatedDate` — it drives the sitemap `lastmod` and schema `dateModified`.
+ *
+ * The phone number and the References section are deliberately omitted: this page is
+ * public HTML and third-party contact details must not be published on it. The wording
+ * differs from the homepage `experience` array on purpose (e.g. "Software Engineer
+ * Intern") — do not merge the two.
+ */
+export const resume = {
+  updatedDate: "2026-09-08",
+  /** ~155 chars for the SERP snippet; `summary` (336) gets truncated. Facts from `summary` only. */
+  metaDescription:
+    "Shafin Ahmed's resume: Full-Stack Software Engineer in Dhaka with 4+ years shipping Next.js, React and TypeScript apps on Laravel, NestJS and Node.js backends.",
+  summary:
+    "Full-Stack Software Engineer with 4+ years shipping production web applications in Next.js, React and TypeScript on Laravel, NestJS, Node.js and PostgreSQL backends. Delivery spans single sign-on (SSO), payment integration, service-oriented architecture, Elasticsearch and Docker-based CI/CD for HR, NGO and property-technology clients.",
+  skills: [
+    {
+      label: "Languages",
+      items: [
+        "TypeScript",
+        "JavaScript (ES6+)",
+        "PHP",
+        "Python",
+        "Java",
+        "C++",
+        "C#",
+        "SQL",
+        "HTML5",
+        "CSS3",
+      ],
+    },
+    {
+      label: "Frontend",
+      items: [
+        "React",
+        "Next.js (App Router)",
+        "Tailwind CSS",
+        "ShadCN UI",
+        "TanStack Query",
+        "Zustand",
+        "Redux",
+        "SSR/SSG",
+      ],
+    },
+    {
+      label: "Backend",
+      items: [
+        "Node.js",
+        "NestJS",
+        "Laravel",
+        "Django",
+        "REST APIs",
+        "GraphQL",
+        "Microservices",
+        "Service-Oriented Architecture",
+      ],
+    },
+    {
+      label: "Databases & Search",
+      items: ["PostgreSQL", "MySQL", "MongoDB", "Elasticsearch"],
+    },
+    {
+      label: "DevOps & Cloud",
+      items: ["Docker", "Amazon Web Services (AWS)", "CI/CD", "Turborepo", "Git", "Electron"],
+    },
+    {
+      label: "Practices & Tools",
+      items: [
+        "Agile/Scrum",
+        "Jira",
+        "Single Sign-On (SSO)",
+        "Cryptography",
+        "Search Engine Optimization (SEO)",
+        "Headless WordPress",
+        "Puppeteer",
+      ],
+    },
+  ],
+  experience: [
+    {
+      title: "Software Engineer",
+      subtitle: "ARITS Limited",
+      location: "Dhaka, Bangladesh",
+      period: "June 2024 – Present",
+      bullets: [
+        "Architected responsive front-end interfaces for 3 production Next.js applications with real-time data synchronisation, global state management and multi-factor authentication (MFA).",
+        "Designed a single sign-on (SSO) flow using middleware-shared encrypted cookies across subdomains, removing repeat logins across 7 platform modules and 4 permission roles.",
+        "Reduced deployment time by 50% by containerising applications with Docker and standardising CI/CD workflows.",
+        "Integrated Stripe payments, notification and messaging services, and partnered with backend engineers on microservice architecture and encrypted data transactions.",
+      ],
+    },
+    {
+      title: "Junior Software Engineer",
+      subtitle: "ARITS Limited",
+      location: "Dhaka, Bangladesh",
+      period: "Sept 2022 – June 2024",
+      bullets: [
+        "Designed and shipped 12+ complex responsive user interfaces in Next.js and TypeScript, including global state management and authentication systems.",
+        "Built a library of reusable Next.js components, reducing duplicated interface code across projects.",
+        "Containerised 40%+ of team deployments with Docker and applied cryptography to secure data transactions within a microservice architecture.",
+      ],
+    },
+    {
+      title: "Software Engineer Intern",
+      subtitle: "ARITS Limited",
+      location: "Dhaka, Bangladesh",
+      period: "June 2022 – Sept 2022",
+      bullets: [
+        "Built server-side rendered (SSR) applications in Next.js and integrated RESTful API endpoints with modern state-management libraries.",
+        "Developed backend services and REST APIs in Laravel, integrating Elasticsearch for optimised data querying and retrieval.",
+      ],
+    },
+  ],
+  projects: [
+    {
+      title: "HumR – Multi-Company HR Platform",
+      subtitle: "Frontend Lead",
+      period: "June 2024 – Present",
+      stack: [
+        "Next.js 16",
+        "TypeScript",
+        "Turborepo",
+        "TanStack Query",
+        "ShadCN UI",
+        "Tailwind CSS",
+        "Cryptography",
+      ],
+      bullets: [
+        "Architected the front-end codebase for a multi-company HR platform spanning 3 Next.js applications, 7 functional modules and 4 permission personas.",
+        "Implemented single sign-on across subdomains with middleware-shared encrypted cookies, keeping one session valid across every module, and standardised server state on TanStack Query.",
+        "Published shared Turborepo packages for common utilities and interface primitives, removing duplicate implementations across the three applications.",
+        [
+          "Delivered reusable interactive components: ",
+          { text: "Dynamic Form Builder", url: "https://dynamic-form-builder-ruddy.vercel.app/" },
+          ", ",
+          { text: "Weekly Routine Builder", url: "https://routine-builder-app.vercel.app/" },
+          ", ",
+          { text: "Calendar Routine", url: "https://routine-calendar-app.vercel.app/" },
+          ", ",
+          { text: "Attendance Clock In/Out", url: "https://attendance-app-two-beta.vercel.app/" },
+          " and ",
+          { text: "Attendance Reporting", url: "https://attendance-summary-app-alpha.vercel.app/" },
+          ".",
+        ],
+      ],
+    },
+    {
+      title: "Oporajita – The Asia Foundation",
+      subtitle: "Frontend Engineer",
+      url: "https://arits.tech/our-work/oporajita-web-application",
+      period: "2025",
+      stack: [
+        "Next.js",
+        "TypeScript",
+        "Elasticsearch",
+        "Docker",
+        "TanStack Query",
+        "Service-Oriented Architecture",
+      ],
+      bullets: [
+        "Built a real-time data and collaboration dashboard used by 15 partner organisations across Bangladesh's garment sector, delivered end to end in an 8-week cycle from UX design to deployment.",
+        "Replaced 15 incompatible spreadsheet conventions with a single submission schema, making cross-partner comparison a property of the system rather than a manual reconciliation pass.",
+        "Shipped 4 core capabilities: a donor and project report builder, a collaboration tracker surfacing joint activities, and a historical archive keeping every submission reviewable.",
+      ],
+    },
+    {
+      title: "Bullwip – UK Rental Onboarding Platform",
+      subtitle: "Full-Stack Engineer",
+      url: "https://app.bullwip.co.uk/",
+      period: "2025 – Present",
+      stack: [
+        "Next.js 16",
+        "TypeScript",
+        "Laravel",
+        "PostgreSQL",
+        "Elasticsearch",
+        "Docker",
+        "ShadCN UI",
+        "Tailwind CSS",
+      ],
+      bullets: [
+        "Architected a full-stack rental onboarding platform for the UK housing market: Next.js front end, Laravel REST API and PostgreSQL persistence.",
+        "Modelled the multi-party onboarding flow as durable server-side state so landlords, agents and tenants resume mid-application days later instead of restarting; moved property and applicant search onto Elasticsearch once relational queries stopped returning at interactive latency.",
+      ],
+    },
+    {
+      title: "Datafast – Desktop Data Automation Platform",
+      subtitle: "Full-Stack Engineer",
+      period: "2024 – Present",
+      stack: ["Laravel", "MySQL", "Next.js 14", "TypeScript", "Electron", "Puppeteer", "Docker"],
+      bullets: [
+        "Designed and built the entire system from scratch, packaging the web application as a cross-platform desktop client with Electron.",
+        "Automated browser-based data collection workflows with Puppeteer and normalised front-end data structures to keep large result sets responsive in the interface.",
+      ],
+    },
+    {
+      title: "calternatives.org – Centre for Alternatives",
+      subtitle: "Frontend Engineer",
+      url: "https://www.calternatives.org/",
+      period: "Jan 2025",
+      stack: [
+        "Next.js 14",
+        "TypeScript",
+        "Headless WordPress",
+        "GraphQL",
+        "ACF",
+        "Docker",
+        "SSG/SSR",
+        "SEO",
+      ],
+      bullets: [
+        "Built a headless WordPress front end consuming GraphQL with Advanced Custom Fields (ACF), letting editors publish new content types without front-end changes.",
+        "Improved search visibility by 65% through technical SEO: sitemap and robots configuration, structured data and an SSG/SSR rendering strategy.",
+      ],
+    },
+    {
+      title: "arits.tech – ARITS Limited",
+      subtitle: "Frontend Engineer",
+      url: "https://arits.tech/",
+      period: "Feb 2024",
+      stack: [
+        "Headless WordPress",
+        "GraphQL",
+        "ACF",
+        "Next.js",
+        "TypeScript",
+        "Webflow",
+        "Docker",
+        "SEO",
+      ],
+      bullets: [
+        "Delivered the corporate site for an agency with 400+ projects shipped, built on headless WordPress with GraphQL and ACF-driven content modelling.",
+        "Improved search performance by 45% via sitemap and robots configuration, semantic markup and technical SEO best practice.",
+      ],
+    },
+  ],
+  education: [
+    {
+      title: "Bachelor of Science in Computer Science and Engineering",
+      subtitle: "American International University-Bangladesh",
+      location: "Dhaka, Bangladesh",
+      period: "Jan 2018 – Apr 2022",
+      bullets: [
+        "CGPA 3.58 / 4.00. Thesis: Machine Learning – training a model to detect sentiment in a sentence.",
+      ],
+    },
+  ],
+  certifications: [
+    {
+      name: "Responsive Web Development",
+      issuer: "CodersTrust",
+      location: "Dhaka, Bangladesh",
+      date: "Mar 2020",
+    },
+  ],
+} as const satisfies {
+  updatedDate: string;
+  metaDescription: string;
+  summary: string;
+  skills: readonly { label: string; items: readonly string[] }[];
+  experience: readonly ResumeEntry[];
+  projects: readonly ResumeEntry[];
+  education: readonly ResumeEntry[];
+  certifications: readonly { name: string; issuer: string; location: string; date: string }[];
+};
+
 /** Display order for platforms everywhere on the site. */
 export const platforms: readonly Platform[] = ["upwork", "fiverr", "kwork"];
 
@@ -973,7 +1271,16 @@ const serviceList: Service[] = [
       "On HumR, Shafin Ahmed implemented single sign-on over middleware-shared encrypted cookies, so users move across 7 modules and 4 permission roles without logging in again.",
       "Oporajita, the real-time data and collaboration dashboard Shafin Ahmed worked on for The Asia Foundation, serves 15 partner organisations and went from UX to deployment in 8 weeks.",
     ],
-    stacks: ["Next.js", "TypeScript", "Tailwind CSS", "ShadCN UI", "TanStack Query", "Laravel", "NestJS", "PostgreSQL"],
+    stacks: [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "ShadCN UI",
+      "TanStack Query",
+      "Laravel",
+      "NestJS",
+      "PostgreSQL",
+    ],
     relatedProjects: ["humr", "oporajita"],
     offers: [
       {
@@ -1012,7 +1319,13 @@ const serviceList: Service[] = [
           "The Upwork dashboard project is the front end on an existing API; for API, database and front end together, Shafin Ahmed's full-stack MVP service fits. The Fiverr and Kwork dashboard packages can add a Laravel or NestJS backend with PostgreSQL.",
       },
     ],
-    keywords: ["Next.js dashboard developer", "SaaS dashboard", "admin panel", "React dashboard", "role-based access"],
+    keywords: [
+      "Next.js dashboard developer",
+      "SaaS dashboard",
+      "admin panel",
+      "React dashboard",
+      "role-based access",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1075,7 +1388,13 @@ const serviceList: Service[] = [
           "The client keeps the full source code and documentation. Further changes can be a new project or an hourly contract.",
       },
     ],
-    keywords: ["MVP development", "full-stack developer", "Next.js Laravel", "SaaS MVP", "PostgreSQL"],
+    keywords: [
+      "MVP development",
+      "full-stack developer",
+      "Next.js Laravel",
+      "SaaS MVP",
+      "PostgreSQL",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1137,7 +1456,13 @@ const serviceList: Service[] = [
           "Yes, if its content can be exported. Shafin Ahmed reviews the current site first to scope the move.",
       },
     ],
-    keywords: ["headless WordPress developer", "WordPress Next.js", "WPGraphQL", "headless CMS", "Next.js website"],
+    keywords: [
+      "headless WordPress developer",
+      "WordPress Next.js",
+      "WPGraphQL",
+      "headless CMS",
+      "Next.js website",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1164,7 +1489,8 @@ const serviceList: Service[] = [
     offers: [
       {
         platform: "upwork",
-        title: "You will get a faster Next.js or React site with Core Web Vitals, SEO, AEO and GEO fixes",
+        title:
+          "You will get a faster Next.js or React site with Core Web Vitals, SEO, AEO and GEO fixes",
         url: "https://www.upwork.com/services/product/development-it-a-faster-next-js-or-react-site-with-core-web-vitals-seo-aeo-and-geo-fixes-2101231128061380261",
         fromPrice: 150,
       },
@@ -1203,7 +1529,13 @@ const serviceList: Service[] = [
           "No. Shafin Ahmed's speed and SEO service is for Next.js and React code; other stacks are discussed before ordering.",
       },
     ],
-    keywords: ["Next.js speed optimization", "Core Web Vitals", "technical SEO", "answer engine optimization", "generative engine optimization"],
+    keywords: [
+      "Next.js speed optimization",
+      "Core Web Vitals",
+      "technical SEO",
+      "answer engine optimization",
+      "generative engine optimization",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1228,7 +1560,8 @@ const serviceList: Service[] = [
     offers: [
       {
         platform: "upwork",
-        title: "You will get your Next.js, React or Laravel bugs fixed, with the root cause explained",
+        title:
+          "You will get your Next.js, React or Laravel bugs fixed, with the root cause explained",
         url: "https://www.upwork.com/services/product/development-it-your-next-js-react-or-laravel-bugs-fixed-with-the-root-cause-explained-2101146139378550437",
         fromPrice: 75,
       },
@@ -1247,7 +1580,8 @@ const serviceList: Service[] = [
     ],
     faqs: [
       {
-        question: "Can Shafin Ahmed fix an app built with an AI tool such as Cursor, Lovable, Bolt or v0?",
+        question:
+          "Can Shafin Ahmed fix an app built with an AI tool such as Cursor, Lovable, Bolt or v0?",
         answer:
           "Yes, when the code is Next.js, React or Laravel, including apps on Supabase. Shafin Ahmed finds where the generated code goes wrong, fixes it properly and notes what changed.",
       },
@@ -1262,7 +1596,13 @@ const serviceList: Service[] = [
           "Through an invitation to the GitHub, GitLab or Bitbucket repository; most AI app builders can export to GitHub. Passwords and API keys should stay out of chat.",
       },
     ],
-    keywords: ["Next.js bug fix", "React bug fix", "Laravel bug fix", "fix AI-generated code", "vibe-coded app fix"],
+    keywords: [
+      "Next.js bug fix",
+      "React bug fix",
+      "Laravel bug fix",
+      "fix AI-generated code",
+      "vibe-coded app fix",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1317,7 +1657,13 @@ const serviceList: Service[] = [
           "No. The client supplies the text, or the page is built with clear placeholders to replace later.",
       },
     ],
-    keywords: ["Figma to Next.js", "Next.js landing page", "Figma to React", "landing page developer", "Tailwind CSS"],
+    keywords: [
+      "Figma to Next.js",
+      "Next.js landing page",
+      "Figma to React",
+      "landing page developer",
+      "Tailwind CSS",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1342,7 +1688,8 @@ const serviceList: Service[] = [
     offers: [
       {
         platform: "upwork",
-        title: "You will get Stripe payments in your Next.js or Laravel app: one-time or subscriptions",
+        title:
+          "You will get Stripe payments in your Next.js or Laravel app: one-time or subscriptions",
         url: "https://www.upwork.com/services/product/development-it-stripe-payments-in-your-next-js-or-laravel-app-one-time-or-subscriptions-2101149571258746533",
         fromPrice: 150,
       },
@@ -1364,7 +1711,13 @@ const serviceList: Service[] = [
           "Next.js (App Router, TypeScript) and Laravel. Other stacks are discussed before ordering.",
       },
     ],
-    keywords: ["Stripe integration", "Stripe subscriptions", "Next.js Stripe", "Laravel Stripe", "payment gateway"],
+    keywords: [
+      "Stripe integration",
+      "Stripe subscriptions",
+      "Next.js Stripe",
+      "Laravel Stripe",
+      "payment gateway",
+    ],
     updatedDate: servicesCheckedDate,
   },
   {
@@ -1413,7 +1766,13 @@ const serviceList: Service[] = [
           "Yes. Shafin Ahmed connects the domain during deployment, and the owner keeps full ownership of it.",
       },
     ],
-    keywords: ["Next.js portfolio", "portfolio website", "personal website", "artist website", "React portfolio"],
+    keywords: [
+      "Next.js portfolio",
+      "portfolio website",
+      "personal website",
+      "artist website",
+      "React portfolio",
+    ],
     updatedDate: servicesCheckedDate,
   },
 ];
@@ -1439,8 +1798,12 @@ export const services: Service[] = serviceList.map((service) => ({
     {
       question: `Where can I hire Shafin Ahmed to ${service.task}?`,
       answer: `On ${service.offers
-        .map((offer) => `${platformProfiles[offer.platform].name} (from ${formatOfferPrice(offer)})`)
-        .join(", ")}, as a fixed-price package. Direct links to each listing are at ${SITE_URL}/services/${service.slug}.`,
+        .map(
+          (offer) => `${platformProfiles[offer.platform].name} (from ${formatOfferPrice(offer)})`,
+        )
+        .join(
+          ", ",
+        )}, as a fixed-price package. Direct links to each listing are at ${SITE_URL}/services/${service.slug}.`,
     },
     ...service.faqs,
   ],
@@ -1512,7 +1875,9 @@ export const faqs: Faq[] = [
     question: "What services does Shafin Ahmed offer?",
     answer: `Shafin Ahmed offers fixed-price freelance services: ${services
       .map((service) => service.name)
-      .join(", ")}. Each one is available on Upwork, Fiverr or Kwork, and ${SITE_URL}/services links to every live listing with its starting price.`,
+      .join(
+        ", ",
+      )}. Each one is available on Upwork, Fiverr or Kwork, and ${SITE_URL}/services links to every live listing with its starting price.`,
   },
   {
     question: "What has Shafin Ahmed built?",
@@ -1551,3 +1916,85 @@ export const caseStudyProjects = projects.filter((p) => p.caseStudy !== null);
 
 /** Flat list of every skill, used for schema.org `knowsAbout`. */
 export const allSkills: string[] = Object.values(skills).flat();
+
+export interface PrivacySection {
+  heading: string;
+  paragraphs: string[];
+  links?: { label: string; href: string }[];
+}
+
+export interface PrivacyPolicy {
+  /** ISO 8601. Shown as "Last updated" on `/privacy`. */
+  updatedDate: string;
+  sections: PrivacySection[];
+}
+
+export const privacyPolicy: PrivacyPolicy = {
+  updatedDate: "2026-10-27",
+  sections: [
+    {
+      heading: "Who runs this site",
+      paragraphs: [
+        "This is my personal portfolio. I run it on my own, and I am the person responsible for what it does with your information. This page explains what that is.",
+      ],
+    },
+    {
+      heading: "Analytics",
+      paragraphs: [
+        "I use Google Analytics 4 to see how the site is used. It records which pages are viewed and clicks on tracked links, such as links to my GitHub and LinkedIn profiles, my freelance marketplace profiles, live project sites, and the resume download.",
+        "When you send a message through the contact form, Google Analytics is told only which project type you selected and whether the submission worked. Your name, email address, company and message are never sent to Google Analytics.",
+        "Google Analytics sets the _ga and _ga_<container-id> cookies in your browser to tell visits apart.",
+      ],
+    },
+    {
+      heading: "Advertising",
+      paragraphs: [
+        "This site shows ads served by Google AdSense. Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites.",
+        "Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet.",
+        "You can opt out of personalised advertising through Google's My Ad Center, and you can opt out of some third-party vendors' cookies for personalised advertising through aboutads.info.",
+      ],
+      links: [
+        {
+          label: "How Google uses information from sites that use its services",
+          href: "https://policies.google.com/technologies/partner-sites",
+        },
+        { label: "Google My Ad Center", href: "https://myadcenter.google.com" },
+        {
+          label: "Opt out of third-party vendor cookies",
+          href: "https://www.aboutads.info/choices/",
+        },
+      ],
+    },
+    {
+      heading: "Cookies and your choices",
+      paragraphs: [
+        "If you visit from the European Economic Area, the United Kingdom or Switzerland, you will see Google's consent message, which comes from a Google-certified consent management platform. Advertising and analytics storage stay off until you make a choice there, and you can change that choice later from the privacy-settings link the message provides.",
+        "Elsewhere, analytics and advertising cookies are on by default. You can turn off personalised ads through Google My Ad Center, linked above, and stop Google Analytics from recording your visits with Google's opt-out browser add-on.",
+      ],
+      links: [
+        {
+          label: "Google Analytics opt-out browser add-on",
+          href: "https://tools.google.com/dlpage/gaoptout",
+        },
+      ],
+    },
+    {
+      heading: "The contact form",
+      paragraphs: [
+        "The contact form asks for your name, your email address, your company (optional), the type of project, and a description of it. Those details are delivered by email, through Resend, to my inbox.",
+        "A confirmation email is also sent to the address you entered.",
+        "Cloudflare Turnstile checks each submission to tell people from bots; your IP address is passed to Cloudflare as part of that check. To limit how often the form can be used, my server also keeps your IP address in memory, with no database, and allows up to 3 submissions from one IP address in any 10-minute window.",
+      ],
+    },
+    {
+      heading: "Browser storage",
+      paragraphs: [
+        "Apart from the analytics, advertising and consent cookies described above, the only thing this site itself stores is your light or dark theme choice, kept in your browser's local storage under the key theme so the site remembers it on your next visit. It is never sent anywhere.",
+      ],
+    },
+    {
+      heading: "Questions",
+      paragraphs: [`If you have a question about this policy, email me at ${profile.email}.`],
+    },
+  ],
+};

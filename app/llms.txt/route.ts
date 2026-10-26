@@ -66,7 +66,9 @@ export async function GET() {
           (offer) =>
             `[${platformProfiles[offer.platform].name}, from ${formatOfferPrice(offer)}](${offer.url})`,
         )
-        .join(", ")}. (plain text: [${service.name}, plain text](${SITE_URL}/services/${service.slug}/llms.txt))`,
+        .join(
+          ", ",
+        )}. (plain text: [${service.name}, plain text](${SITE_URL}/services/${service.slug}/llms.txt))`,
   );
 
   const faqLines = faqs.map((faq) => `### ${faq.question}\n${faq.answer}`);
@@ -115,6 +117,7 @@ ${faqLines.join("\n\n")}
 - Sitemap: ${SITE_URL}/sitemap.xml
 - Robots: ${SITE_URL}/robots.txt
 - JSON-LD: embedded in the HTML of ${SITE_URL} as a schema.org @graph (Person with OfferCatalog, Organization, WebSite, ProfilePage, ItemList, FAQPage); each service page carries a Service with one Offer per marketplace listing
+- Resume (HTML): ${SITE_URL}/resume
 - Resume (PDF): ${SITE_URL}${encodeURI(profile.resume)}
 `;
 

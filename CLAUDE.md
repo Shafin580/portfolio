@@ -30,7 +30,7 @@ pnpm cf-typegen      # Regenerate cloudflare-env.d.ts from wrangler.jsonc
 ### Single-page portfolio + case-study pages
 [app/page.tsx](app/page.tsx) renders the homepage. It is an **async Server Component** — do not add `"use client"` to it.
 
-**All content lives in [lib/portfolio-data.ts](lib/portfolio-data.ts)**, not in the page: `profile`, `experience`, `projects`, `skills`, `navLinks`, `education`, `certification`, `faqs`, and the freelance side — `platformProfiles`, `services`, `servicesFaqs`, `servicesIntro`, `servicesCheckedDate`. Its consumers (page render, case-study and service pages, JSON-LD graphs, the `llms.txt` routes, the build-time social cards in `scripts/generate-og.tsx`, the sitemap) all read from it, so editing content means editing that one file. Never re-inline data into a component.
+**All content lives in [lib/portfolio-data.ts](lib/portfolio-data.ts)**, not in the page: `profile`, `experience`, `projects`, `skills`, `navLinks`, `education`, `certification`, `faqs`, and the freelance side — `platformProfiles`, `services`, `servicesFaqs`, `servicesIntro`, `servicesCheckedDate` — and `privacyPolicy`, the copy behind [app/privacy/page.tsx](app/privacy/page.tsx). Its consumers (page render, case-study and service pages, JSON-LD graphs, the `llms.txt` routes, the build-time social cards in `scripts/generate-og.tsx`, the sitemap) all read from it, so editing content means editing that one file. Never re-inline data into a component.
 
 ### Freelance services — `/services` and `/services/<slug>`
 [app/services/page.tsx](app/services/page.tsx) is the hub; [app/services/[slug]/page.tsx](app/services/[slug]/page.tsx) renders one service: summary, one card per live marketplace listing (Upwork / Fiverr / Kwork, "From $X"), deliverables, proof sentences, related case studies, FAQ. A service's first FAQ is generated from its `offers`, so the quoted prices cannot drift from the cards. The homepage `#services` section and the Person's `hasOfferCatalog` list the same `services` array. **Listing URLs and prices are checked by hand, not by `checkLinks()`** (Upwork and Fiverr return 403 to server fetches) — update `servicesCheckedDate` whenever one changes. Copy traces to the approved gig files in `~/dev/freelance`; no AEO/GEO outcome may be claimed.
@@ -41,6 +41,30 @@ pnpm cf-typegen      # Regenerate cloudflare-env.d.ts from wrangler.jsonc
 **A project gets a page purely by having a non-null `caseStudy`.** `caseStudyProjects` in `lib/portfolio-data.ts` is the single derived list; `generateStaticParams`, `app/sitemap.ts`, the prev/next nav, the `llms.txt` route beside it, and the social card its metadata points at all read from it. `dynamicParams = false`, so any other slug 404s to [app/projects/[slug]/not-found.tsx](app/projects/[slug]/not-found.tsx). Today: 7 projects have one (`humr`, `oporajita`, `shaathi`, `calternatives`, `arits`, `sheraa`, `tazcreates`); the 2 remaining professional cards and the 3 personal ones do not.
 
 Chrome is shared with the homepage via [components/site-header.tsx](components/site-header.tsx) (takes `hrefPrefix="/"` off-homepage so `#about` anchors resolve) and [components/site-footer.tsx](components/site-footer.tsx). The card/hero image — including the gradient placeholder used when `image` is null — is [components/project-media.tsx](components/project-media.tsx), shared so the two can never drift.
+
+### Web resume — `/resume`
+[app/resume/page.tsx](app/resume/page.tsx) is the resume as static HTML, with a Download PDF
+link (`resume_download`) and a Print button; the header "Resume" button opens this page rather
+than downloading the PDF. Content is the `resume` object in `lib/portfolio-data.ts`,
+**transcribed verbatim from [public/files/main.tex](public/files/main.tex)** — the source of
+the PDF — so edit the two together and bump `resume.updatedDate` (sitemap `lastmod`, schema
+`dateModified`). Its wording deliberately differs from the homepage `experience` array; do
+not merge them. **The phone number and the References section are left out on purpose** —
+third parties' contact details do not belong in indexed HTML. A `@media print` block in
+`globals.css` forces light tokens so a dark-mode print is not white-on-white.
+
+### Hero particle network (three.js)
+Vanilla `three`, no React Three Fiber — one decorative scene does not justify a reconciler.
+[lib/particle-field.ts](lib/particle-field.ts) is framework-free (named imports only);
+[components/hero-canvas.tsx](components/hero-canvas.tsx) skips it under
+`prefers-reduced-motion`, `import()`s it on `requestIdleCallback` so three never sits in the
+initial chunk or competes with the LCP photo, and re-reads `--primary` on theme change
+(three's `Color` cannot parse `oklch()`, so the module resolves it through a 2D canvas). The
+loop pauses offscreen and on hidden tabs; no WebGL or reduced motion leaves the CSS dot grid.
+**[components/hero-scene.tsx](components/hero-scene.tsx) — the `next/dynamic({ ssr: false })`
+wrapper — is what keeps three out of the Worker.** An effect-scoped `import()` alone does not:
+the server build still compiles it and wrangler bundles three (154,273 bytes gzipped,
+measured). Do not import `hero-canvas` or `particle-field` from anywhere else.
 
 ### Live-link health checks
 [lib/link-status.ts](lib/link-status.ts) pings every project's `live` URL at build time; the Live button and the schema.org `url` only render when the ping succeeds. Failure handling is deliberate — only DNS failure / connection refused / 4xx-5xx count as dead; timeouts **fail open** so a flaky build network cannot strip every Live button. Results cache for 24h via `next: { revalidate }` plus `export const revalidate = 86400` on the page (the two must be kept in sync by hand — Next requires a literal there).
@@ -77,9 +101,9 @@ that killed the `resend` SDK: an SDK is not free, and the loader here is `next/s
 which ships with Next. [lib/analytics.ts](lib/analytics.ts) is the one module every call
 site imports; nothing in it throws, and every entry point is truthiness-gated on
 `NEXT_PUBLIC_GA_MEASUREMENT_ID` the way `contact-form.tsx` gates on the Turnstile site key.
-**Empty ID disables the whole feature** — no loader, no banner, no events.
+**Empty ID disables the whole feature** — no loader, no consent defaults, no events.
 
-Four things here are load-bearing:
+Five things here are load-bearing:
 
 - **`next/script` is correct for this, and the ban in *SEO / AEO / GEO* below does not
   apply.** That ban exists because JSON-LD must be in the HTML crawlers receive. Analytics
@@ -89,10 +113,18 @@ Four things here are load-bearing:
   after the `.js` classlist script, not via `next/script`. `dataLayer` is an ordered queue,
   so commands pushed before gtag.js arrives are replayed when it loads — that is what lets
   the loader stay `afterInteractive` while the consent defaults still land first. The
-  region-scoped default (EEA + UK + CH) is IP-resolved by Google and is **what actually
-  enforces denial**; [components/consent-banner.tsx](components/consent-banner.tsx) only
-  offers the opt-in, which is why its time-zone region guess is allowed to be approximate —
-  wrong in either direction fails safe.
+  region-scoped default (EEA + UK + CH, with `wait_for_update: 500`) is IP-resolved by
+  Google and is **what actually enforces denial**; everywhere else, all four signals —
+  `ad_*` included — default to **granted**. Nothing in the repo issues a `consent update`.
+- **There is no consent UI in this repo.** Opt-in in EEA/UK/CH comes from **Google's
+  certified CMP** — the AdSense Privacy & messaging "European regulations" message, delivered
+  by `adsbygoogle.js`. A certified, IAB TCF CMP is mandatory for personalised AdSense ads
+  there, so a hand-rolled banner cannot do this job, and running one beside Google's would
+  double-prompt. The CMP only feeds GA4 when **both** consent-mode settings ("advertising
+  purposes" and "analytics purposes") are switched on in that message's AdSense settings;
+  if they are off, EEA visitors stay analytics-denied with no way to opt in. The custom
+  `consent-banner.tsx` and its time-zone region guess are deleted — do not bring them back.
+
 - **Never call `useSearchParams()` in anything the root layout renders.** Without a
   `<Suspense>` boundary it bails every route out of static prerendering, and the four ISR
   routes are the entire reason `open-next.config.ts` provisions an R2 incremental cache.
@@ -101,6 +133,15 @@ Four things here are load-bearing:
 - The resume event is **`resume_download`, not `file_download`** — GA4 enhanced measurement
   already fires `file_download` automatically for `.pdf`, so reusing the name double-counts.
 
+The AdSense loader is a **plain `defer` `<script>`** in `<head>`, after the consent bootstrap,
+gated on `NEXT_PUBLIC_GOOGLE_ADSENSE_ID` (which also drives the `google-adsense-account`
+verification meta). Not `next/script` — AdSense warns about the `data-nscript` attribute it
+adds. **Not `async` either**, despite Google's stock snippet: React 19 hoists every
+`async` + `src` script to the top of `<head>`, ahead of the inline consent defaults, and a
+cached copy could then run before they are queued (caught in the browser, not guessed). AdSense policy requires the privacy policy at [app/privacy/page.tsx](app/privacy/page.tsx),
+whose copy lives in `privacyPolicy` in `lib/portfolio-data.ts`; change a tracking or ad
+behaviour and that copy must change with it.
+
 [components/tracked-link.tsx](components/tracked-link.tsx) is the one tracked anchor. It
 spreads every prop and passes `ref` through, so it drops into ShadCN `<Button asChild>`
 (Radix `Slot`); it never calls `preventDefault`, so a blocked beacon costs a data point and
@@ -108,7 +149,9 @@ never the visitor's click. **No personal data may be sent** — the contact-form
 `generate_lead` reports `project_type` only, never name, email, company, or message body.
 
 There is **no CSP anywhere in this repo**. If one is ever added it must allow
-`https://www.googletagmanager.com`.
+`https://www.googletagmanager.com` plus the AdSense/CMP origins —
+`pagead2.googlesyndication.com`, `fundingchoicesmessages.google.com`,
+`googleads.g.doubleclick.net`, and whatever else the browser reports blocked.
 
 Google **Preferred Sources** is a plain deeplink in
 [components/site-footer.tsx](components/site-footer.tsx), built from `SITE_URL`. Google
@@ -147,7 +190,7 @@ output when there is nothing citable.**
 ### Component library
 ShadCN UI (new-york style, Tailwind v4 native) lives in `components/ui/`, imported via `@/components/ui/<name>`. Only the 15 components actually used are present — add more with `pnpm dlx shadcn@latest add <name>`. Radix comes from the **unified `radix-ui` package**, not per-component `@radix-ui/react-*`.
 
-Custom components: [components/logo.tsx](components/logo.tsx) (`< S >` mark, inline SVG), [components/brand-icons.tsx](components/brand-icons.tsx) (GitHub/LinkedIn/Upwork/Fiverr — lucide-react v1 removed brand marks), [components/platform-icon.tsx](components/platform-icon.tsx) (marketplace mark for a `Platform`), [components/faq.tsx](components/faq.tsx), [components/animated-section.tsx](components/animated-section.tsx), [components/contact-form.tsx](components/contact-form.tsx) (see *Contact pipeline*), [components/theme-toggle.tsx](components/theme-toggle.tsx), [components/site-header.tsx](components/site-header.tsx), [components/site-footer.tsx](components/site-footer.tsx), [components/project-media.tsx](components/project-media.tsx).
+Custom components: [components/logo.tsx](components/logo.tsx) (`< S >` mark, inline SVG), [components/brand-icons.tsx](components/brand-icons.tsx) (GitHub/LinkedIn/Upwork/Fiverr — lucide-react v1 removed brand marks), [components/platform-icon.tsx](components/platform-icon.tsx) (marketplace mark for a `Platform`), [components/faq.tsx](components/faq.tsx), [components/animated-section.tsx](components/animated-section.tsx), [components/contact-form.tsx](components/contact-form.tsx) (see *Contact pipeline*), [components/theme-toggle.tsx](components/theme-toggle.tsx), [components/site-header.tsx](components/site-header.tsx), [components/site-footer.tsx](components/site-footer.tsx), [components/project-media.tsx](components/project-media.tsx), [components/hero-scene.tsx](components/hero-scene.tsx) + [components/hero-canvas.tsx](components/hero-canvas.tsx) (see *Hero particle network*), [components/print-button.tsx](components/print-button.tsx).
 
 ### Key utilities
 - `cn()` in [lib/utils.ts](lib/utils.ts) — always use this for merging Tailwind classes conditionally (clsx + tailwind-merge). `tailwind-merge` must stay on v3+ or it mis-merges Tailwind v4 class names.
@@ -204,6 +247,9 @@ Measured on this repo, not guessed:
 | With `next/og` routes + `resend` SDK + `@react-email/components` | 3,970,828 — **over** |
 | After moving the cards to build time (`scripts/generate-og.tsx`) | 3,154,495 — still over |
 | After replacing the SDK + React Email with `fetch` and HTML strings | **1,365,979** |
+| HEAD on 2026-10-27, before the hero scene and `/resume` | 1,521,270 |
+| three.js hero with an effect-scoped `import()` only (+ `/resume`, `/privacy`) | 1,916,231 — three in the Worker |
+| Same, hero behind `next/dynamic({ ssr: false })` | **1,761,958** |
 
 Two rules follow. **Anything computable once at build time belongs in `scripts/`, emitted
 into `public/`, and served as a static asset** — assets do not count against the script
@@ -330,7 +376,8 @@ Two files, deliberately split — `.env` is **tracked in git** and `.env*.local`
 |---|---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | `.env` | Build variable | Canonical origin; fallback in `lib/site.ts` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | `.env` | Build variable | Public by design — the widget needs it in the browser |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | `.env.local` | Build variable | GA4 `G-…`. Public, but kept out of git so a fork cannot pollute the property — the one public value not in `.env`. **Build variable, never a Worker `var`** — `NEXT_PUBLIC_*` are inlined at build time, so a runtime var does nothing. Workers Builds never sees `.env.local`, so without the Build variable production renders identically and collects nothing. Empty disables analytics entirely |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | `.env.local` | Build variable | GA4 `G-…`. Public, but kept out of git so a fork cannot pollute the property — one of the two public values not in `.env`. **Build variable, never a Worker `var`** — `NEXT_PUBLIC_*` are inlined at build time, so a runtime var does nothing. Workers Builds never sees `.env.local`, so without the Build variable production renders identically and collects nothing. Empty disables analytics entirely |
+| `NEXT_PUBLIC_GOOGLE_ADSENSE_ID` | `.env.local` | Build variable | AdSense `ca-pub-…`. Same split and trap as the GA ID. Drives the verification meta tag **and** the auto-ads loader that delivers Google's consent message — empty disables both, which leaves EEA/UK/CH visitors analytics-denied with no opt-in |
 | `TURNSTILE_SECRET_KEY` | `.env.local` | `wrangler secret put` | **Never** prefix `NEXT_PUBLIC_` |
 | `RESEND_API_KEY` | `.env.local` | `wrangler secret put` | **Never** prefix `NEXT_PUBLIC_` |
 | `CONTACT_TO_EMAIL` | `.env.local` | `vars` in `wrangler.jsonc` | Where enquiries land |

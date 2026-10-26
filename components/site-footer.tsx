@@ -21,11 +21,11 @@ const PREFERRED_SOURCE_URL = `https://www.google.com/preferences/source?q=${new 
 /** Shared footer for the homepage, the case-study pages and the service pages. */
 export function SiteFooter() {
   return (
-    <footer className="border-t py-8 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-background border-t py-8 print:hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav
           aria-label="Hire me"
-          className="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground sm:justify-start"
+          className="text-muted-foreground mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm sm:justify-start"
         >
           <Link href="/services" className="hover:text-foreground font-medium transition-colors">
             Services
@@ -44,9 +44,14 @@ export function SiteFooter() {
             </TrackedLink>
           ))}
         </nav>
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} {profile.name}. All rights reserved.</p>
+        <div className="text-muted-foreground flex flex-col items-center justify-between gap-4 text-sm sm:flex-row">
+          <p>
+            © {new Date().getFullYear()} {profile.name}. All rights reserved.
+          </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
             <TrackedLink
               href={PREFERRED_SOURCE_URL}
               target="_blank"
@@ -59,8 +64,8 @@ export function SiteFooter() {
             </TrackedLink>
             <div className="flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
               </span>
               Available for new opportunities
             </div>

@@ -21,6 +21,7 @@ import { AnimatedSection } from "@/components/animated-section";
 import { ContactForm } from "@/components/contact-form";
 import { GithubIcon, LinkedinIcon } from "@/components/brand-icons";
 import { Faq } from "@/components/faq";
+import { HeroScene } from "@/components/hero-scene";
 import { PlatformIcon } from "@/components/platform-icon";
 import { ProjectMedia } from "@/components/project-media";
 import { SiteHeader } from "@/components/site-header";
@@ -76,19 +77,8 @@ export default async function Home() {
               className="bg-primary/5 pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl sm:h-[700px] sm:w-[700px]"
               aria-hidden="true"
             />
-            {/* Floating decorative shapes (desktop only) */}
-            <div
-              className="border-primary/10 animate-float pointer-events-none absolute top-24 right-[12%] hidden h-16 w-16 rounded-xl border md:block"
-              aria-hidden="true"
-            />
-            <div
-              className="border-primary/10 animate-float-delayed pointer-events-none absolute bottom-32 left-[8%] hidden h-12 w-12 rounded-full border md:block"
-              aria-hidden="true"
-            />
-            <div
-              className="border-primary/5 animate-float pointer-events-none absolute top-1/3 left-[4%] hidden h-8 w-8 rotate-45 rounded-md border lg:block"
-              aria-hidden="true"
-            />
+            {/* Particle network; the dot grid behind it is the no-WebGL and reduced-motion fallback */}
+            <HeroScene />
 
             {/* Content */}
             <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">

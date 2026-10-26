@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { caseStudyProjects, services } from "@/lib/portfolio-data";
+import { caseStudyProjects, resume, services } from "@/lib/portfolio-data";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 /**
@@ -30,7 +30,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .sort()
     .at(-1);
 
-  const newest = [...caseStudyProjects.map((project) => project.caseStudy!.updatedDate), newestService]
+  const newest = [
+    ...caseStudyProjects.map((project) => project.caseStudy!.updatedDate),
+    newestService,
+  ]
     .filter((date): date is string => Boolean(date))
     .sort()
     .at(-1);
@@ -47,6 +50,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: newestService ? new Date(newestService) : undefined,
       changeFrequency: "monthly",
       priority: 0.9,
+    },
+    {
+      url: absoluteUrl("/resume"),
+      lastModified: new Date(resume.updatedDate),
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     ...serviceEntries,
     ...projectEntries,

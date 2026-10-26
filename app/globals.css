@@ -179,32 +179,6 @@
   animation: hero-scale-in 0.8s ease-out 0.3s forwards;
 }
 
-/* ── Floating decorative shapes ── */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(3deg);
-  }
-}
-@keyframes float-delayed {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(-2deg);
-  }
-}
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-.animate-float-delayed {
-  animation: float-delayed 8s ease-in-out infinite;
-}
-
 /* ── Photo glow pulse ── */
 @keyframes pulse-slow {
   0%,
@@ -230,10 +204,24 @@
     animation: none;
     opacity: 1;
   }
-  .animate-float,
-  .animate-float-delayed,
   .animate-pulse-slow {
     animation: none;
+  }
+}
+
+/* ── Print ──
+   Paper is white whatever the screen theme, and browsers drop backgrounds by default, so
+   printing (e.g. /resume) in dark mode would put near-white text on a white page. Restate
+   the light values for the tokens printed text uses; same numbers as `:root`. */
+@media print {
+  .dark {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.1294 0.0273 261.671);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.1294 0.0273 261.671);
+    --primary: oklch(0.546 0.2153 262.872);
+    --muted-foreground: oklch(0.5513 0.0233 264.365);
+    --border: oklch(0.9278 0.0058 264.531);
   }
 }
 

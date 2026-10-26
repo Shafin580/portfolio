@@ -4,13 +4,15 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
-import { ConsentBanner } from "@/components/consent-banner";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { profile } from "@/lib/portfolio-data";
-import { CONSENT_DENIED_REGIONS, CONSENT_KEY, GA_ID } from "@/lib/analytics";
+import { CONSENT_DENIED_REGIONS, GA_ID } from "@/lib/analytics";
 import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+
+/** AdSense publisher ID (`ca-pub-…`). Public by design; empty disables ads and the verification tag. */
+const ADSENSE_ID = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
 
 /**
  * Consent Mode v2 defaults plus the gtag queue, inlined ahead of gtag.js.
@@ -22,7 +24,14 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
  *
  * The region-scoped default is written first and the global one second purely as
  * documentation; Google resolves the most specific matching region regardless of
- * order.
+ * order. Outside those regions everything defaults to granted.
+ *
+ * Nothing here issues a `consent update`. In EEA/UK/CH that comes from Google's
+ * certified CMP — the AdSense Privacy & messaging "European regulations" message,
+ * delivered by `adsbygoogle.js` — which needs both of its consent-mode settings
+ * switched on to pass ad *and* analytics choices back to gtag. `wait_for_update`
+ * holds the first hit up to 500 ms so a returning visitor's stored choice can land
+ * before it; if the CMP is slower, that hit simply goes out denied.
  *
  * No request data reaches this string — every interpolated value is a build-time
  * env var or a constant in this repo. `js()` still hardens each one, because
@@ -35,9 +44,8 @@ const js = (value: unknown) => JSON.stringify(value ?? null).replace(/</g, "\\u0
 const consentBootstrap = `window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments)}
 gtag('js',new Date());
-gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:${js(CONSENT_DENIED_REGIONS)}});
-gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
-try{var c=localStorage.getItem(${js(CONSENT_KEY)});if(c==='granted'||c==='denied')gtag('consent','update',{analytics_storage:c})}catch(e){}
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',region:${js(CONSENT_DENIED_REGIONS)},wait_for_update:500});
+gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});
 gtag('config',${js(GA_ID)},{send_page_view:false});`;
 
 const title = `${profile.name} — ${profile.title}`;
@@ -136,9 +144,7 @@ export const metadata: Metadata = {
   },
   // AdSense site verification for shadev-tech.com, which also covers its subdomains
   // (e.g. sanchay.shadev-tech.com). The publisher id is public by design.
-  ...(process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID
-    ? { other: { "google-adsense-account": process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID } }
-    : {}),
+  ...(ADSENSE_ID ? { other: { "google-adsense-account": ADSENSE_ID } } : {}),
 };
 
 export const viewport: Viewport = {
@@ -166,6 +172,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         {GA_ID && <script dangerouslySetInnerHTML={{ __html: consentBootstrap }} />}
+        {/*
+          AdSense auto ads, which also deliver Google's consent message to EEA/UK/CH
+          visitors. A plain `<script>`, not `next/script`: AdSense warns about the
+          `data-nscript` attribute that one adds.
+
+          `defer`, not Google's stock `async`. React 19 hoists any `async` + `src` script
+          to the top of `<head>`, ahead of the inline consent defaults above, and a cached
+          copy could then run before they are queued. A deferred script is rendered in
+          place and runs after parsing, so the defaults always land first.
+        */}
+        {ADSENSE_ID && (
+          <script
+            defer
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -185,7 +208,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
               />
               <PageViewTracker />
-              <ConsentBanner />
             </>
           )}
         </ThemeProvider>

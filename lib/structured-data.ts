@@ -8,6 +8,7 @@ import {
   platforms,
   profile,
   projects,
+  resume,
   services,
   servicesFaqs,
   type NamedEntity,
@@ -38,6 +39,7 @@ const projectId = (project: Project) => `${SITE_URL}/projects/${project.slug}#pr
 const serviceId = (service: Service) => `${SITE_URL}/services/${service.slug}#service`;
 
 const SERVICES_URL = absoluteUrl("/services");
+const RESUME_URL = absoluteUrl("/resume");
 
 /**
  * A service as a reference-able stub: enough for a list or catalog to name it,
@@ -64,7 +66,11 @@ function serviceStub(service: Service) {
  * "The Asia Foundation" and it guessing.
  */
 const entityId = (entity: NamedEntity) =>
-  `${SITE_URL}/#org-${entity.url.replace(/^https?:\/\/(www\.)?/, "").replace(/[^a-z0-9]+/gi, "-").replace(/-+$/, "").toLowerCase()}`;
+  `${SITE_URL}/#org-${entity.url
+    .replace(/^https?:\/\/(www\.)?/, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/-+$/, "")
+    .toLowerCase()}`;
 
 function organizationNode(entity: NamedEntity) {
   return {
@@ -149,7 +155,9 @@ export function buildProjectStructuredData(project: Project, isLive: boolean) {
         abstract: study.overview,
         datePublished: study.publishedDate,
         dateModified: study.updatedDate,
-        ...(client ? { sponsor: { "@id": entityId(client) }, about: { "@id": entityId(client) } } : {}),
+        ...(client
+          ? { sponsor: { "@id": entityId(client) }, about: { "@id": entityId(client) } }
+          : {}),
         ...(mentions.length ? { mentions: mentions.map((e) => ({ "@id": entityId(e) })) } : {}),
         ...(study.sources.length
           ? {
@@ -347,6 +355,37 @@ export function buildServicesHubStructuredData() {
         ],
       },
       faqPageNode(SERVICES_URL, servicesFaqs),
+    ],
+  };
+}
+
+/** The `@graph` for `/resume`: the page itself and its breadcrumb. */
+export function buildResumeStructuredData() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      personStub,
+      {
+        "@type": "WebPage",
+        "@id": `${RESUME_URL}#webpage`,
+        url: RESUME_URL,
+        name: `Resume — ${profile.name}`,
+        description: resume.metaDescription,
+        isPartOf: { "@id": WEBSITE_ID },
+        about: { "@id": PERSON_ID },
+        author: { "@id": PERSON_ID },
+        breadcrumb: { "@id": `${RESUME_URL}#breadcrumb` },
+        dateModified: resume.updatedDate,
+        inLanguage: "en",
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${RESUME_URL}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Resume", item: RESUME_URL },
+        ],
+      },
     ],
   };
 }
