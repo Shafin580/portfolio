@@ -88,7 +88,9 @@ async function main() {
       await renderOgCard({
         eyebrow: "Case study",
         title: project.title,
-        subtitle: study.client ?? `${profile.employer} · in-house`,
+        subtitle:
+          study.client ??
+          (project.category === "personal" ? "Personal product" : `${profile.employer} · in-house`),
         body: project.description,
         chips: project.stacks.slice(0, 5),
       }),

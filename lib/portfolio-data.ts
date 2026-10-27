@@ -73,7 +73,7 @@ export interface NamedEntity {
  * facts stated elsewhere in the same entry.
  */
 export interface CaseStudy {
-  /** Who it was built for. `null` for in-house products. */
+  /** Who it was built for. `null` for in-house and personal products. */
   client: string | null;
   /** Human-readable delivery window, e.g. "2025" or "2023 – 2024". */
   year: string;
@@ -251,6 +251,9 @@ const CASE_STUDY_DATE = "2026-08-04";
 
 /** Tazcreates shipped after the first batch, so it carries its own write-up date. */
 const TAZCREATES_DATE = "2026-08-23";
+
+/** Sanchay Hisab likewise carries its own write-up date. */
+const SANCHAY_HISAB_DATE = "2026-10-27";
 
 export const projects: Project[] = [
   {
@@ -862,6 +865,121 @@ export const projects: Project[] = [
         },
       ],
       entities: [{ name: "Tazcreates", url: "https://tazcreates.site/", role: "Client" }],
+      externalCaseStudy: null,
+    },
+  },
+  {
+    slug: "sanchay-hisab",
+    title: "Sanchay Hisab",
+    description:
+      "Bilingual English/Bengali profit calculator for Bangladesh Sanchaypatra, the government savings certificates. Covers five schemes with source tax, slab rates from total holding, rates locked to the purchase date, payout schedules, and early-encashment clawback.",
+    image: "/img/sanchay-hisab.png",
+    stacks: [
+      "Next.js 16",
+      "TypeScript",
+      "next-intl",
+      "Tailwind CSS v4",
+      "Cloudflare Workers",
+      "OpenNext",
+      "Jest",
+    ],
+    live: "https://sanchay.shadev-tech.com/",
+    repo: null,
+    category: "personal",
+    schemaType: "SoftwareApplication",
+    caseStudy: {
+      client: null,
+      year: "2026",
+      role: "Full-Stack Engineer",
+      publishedDate: SANCHAY_HISAB_DATE,
+      updatedDate: SANCHAY_HISAB_DATE,
+      overview:
+        "Sanchay Hisab (সঞ্চয় হিসাব) is a profit calculator for Bangladesh Sanchaypatra, the government savings certificates, in English and Bengali. For any amount across five schemes it shows the net profit per payout after source tax, the dated payout schedule, and what cashing out early pays, with the calculation running in the browser.",
+      takeaways: [
+        "Sanchay Hisab computes each certificate with the rate set in force on its purchase date, because a Sanchaypatra keeps that rate for its whole tenure; the September 2021, January 2025 and July 2025 rate sets ship side by side.",
+        "Sanchay Hisab picks the rate slab and the source-tax rate from the investor's total Sanchaypatra holding, not from the single certificate being calculated.",
+        "Every number in Sanchay Hisab's calculator, guides, share images and llms.txt is derived from one rate file, so a government rate revision is one appended entry rather than an edit across the site.",
+      ],
+      stats: [
+        { value: "5", label: "savings schemes covered" },
+        { value: "2", label: "languages: English and Bengali" },
+        { value: "3", label: "government rate sets on file" },
+        { value: "28", label: "share images, one per route per locale" },
+      ],
+      problem:
+        "A Sanchaypatra's headline rate says little about what it actually pays. The rate slab depends on the investor's total holding across every scheme, the source-tax rate depends on that same holding, and a certificate keeps whichever rate set was in force on its purchase date even after the government revises rates, which it usually reviews every January and July. Cashing out early swaps in a lower premature rate and recovers profit already paid out of the principal. Purchases above ৳10 lakh also need an e-TIN and proof of return submission.",
+      solution:
+        "The rules live as data in one rate file: each scheme's tenure, payout frequency, purchase ceilings and denominations, and every government rate set with its effective date, slab ceilings, maturity and premature tables, and the source it was read from with the date that source was last checked. A pure calculation engine picks the rate set from the purchase date and the slab from total holding, then returns the net per payout after source tax, the dated schedule and the maturity totals, or the early-encashment result with its clawback; a separate alerts module flags eligibility, purchase-ceiling and e-TIN/PSR requirements. The calculator keeps its state in the URL, so a result can be shared as a link. English is served at / and Bengali at /bn through next-intl, with Bengali digits in the Bengali interface. The per-page share images are drawn at build time with text shaped by HarfBuzz through harfbuzzjs and handed to resvg as glyph paths, because satori cannot shape Bengali and resvg-js 2.6 gives Bengali spacing vowel signs zero advance.",
+      features: [
+        "Five schemes: 3-month profit-based, 5-year Bangladesh Sanchaypatra, Paribar, Pensioner, and the Post Office fixed deposit",
+        "Net profit per payout after source tax, with the rate slab picked from total holding",
+        "Dated payout schedule and totals at maturity",
+        "Early-encashment result, including profit clawed back from the principal",
+        "Eligibility, purchase-ceiling and e-TIN/PSR alerts",
+        "Rates locked by purchase date, so past purchases compute with the rate set that applied then",
+        "Calculator state in the URL, so a result can be shared as a link",
+        "Full English and Bengali interfaces at / and /bn, with Bengali digits",
+        "Content pages: scheme comparison, rates and history, a guide per scheme, tax and rules, FAQ",
+        "28 build-time share images, one for each of 14 routes in both locales, with HarfBuzz text shaping for Bengali",
+        "Results labelled as estimates, with the issuing bank, post office or savings bureau confirming the final figure",
+        "Deployed to Cloudflare Workers via OpenNext",
+      ],
+      outcomes: [
+        "Live at sanchay.shadev-tech.com in English, and at /bn in Bengali",
+        "A rate revision is one appended entry in the rate file; the calculator, content pages, share images, llms.txt and sitemap pick it up on the next build",
+        "Bengali share images render with correct vowel-sign spacing, which neither satori nor resvg-js 2.6 managed on their own",
+      ],
+      faqs: [
+        {
+          question: "What is Sanchay Hisab?",
+          answer:
+            "Sanchay Hisab is a profit calculator for Bangladesh Sanchaypatra, the government savings certificates, in English and Bengali. It covers five schemes and shows the net profit per payout after source tax, the dated payout schedule, and what cashing out early pays. Results are estimates; the issuing bank, post office or savings bureau confirms the final figure.",
+        },
+        {
+          question: "Which Sanchaypatra schemes does Sanchay Hisab cover?",
+          answer:
+            "Sanchay Hisab covers five schemes: the 3-month profit-based Sanchaypatra, the 5-year Bangladesh Sanchaypatra, Paribar Sanchaypatra, Pensioner Sanchaypatra, and the Post Office fixed deposit.",
+        },
+        {
+          question: "Why does the purchase date change a Sanchaypatra calculation?",
+          answer:
+            "A Sanchaypatra keeps the rate set that was in force on its purchase date for its whole tenure, even after the government revises rates. Sanchay Hisab keeps every published rate set, from September 2021, January 2025 and July 2025, and computes each certificate with the one that applied when it was bought.",
+        },
+        {
+          question: "How does Sanchay Hisab render Bengali text in its share images?",
+          answer:
+            "The share images are drawn at build time with text shaped by HarfBuzz, through harfbuzzjs, and passed to resvg as glyph paths. satori cannot shape Bengali at all, and resvg-js 2.6 gives Bengali spacing vowel signs zero advance, so neither could render the Bengali cards on its own.",
+        },
+        {
+          question: "What was Shafin Ahmed's role on Sanchay Hisab?",
+          answer:
+            "Shafin Ahmed designed, built and deployed Sanchay Hisab: the rate data and calculation engine, the English and Bengali interfaces, the content pages, the build-time share images, and the Cloudflare Workers deployment through OpenNext.",
+        },
+      ],
+      sources: [
+        {
+          label: "Sanchay Hisab",
+          url: "https://sanchay.shadev-tech.com/",
+          publisher: "Sanchay Hisab",
+        },
+        {
+          label: "Govt keeps national savings rates unchanged for Jul-Dec",
+          url: "https://www.thedailystar.net/business/news/govt-keeps-national-savings-rates-unchanged-jul-dec-4214081",
+          publisher: "The Daily Star",
+        },
+        {
+          label:
+            "Sanchayapatra interest rate revised: New profit rates of Bangladesh National Savings Certificate in 2025",
+          url: "https://unb.com.bd/category/Bangladesh/sanchayapatra-interest-rate-revised-new-profit-rates-of-bangladesh-national-savings-certificate-in-2025/152061",
+          publisher: "UNB",
+        },
+        {
+          label: "সঞ্চয়পত্রে বিনিয়োগে কত মুনাফা (Sanchaypatra profit rates)",
+          url: "https://www.prothomalo.com/business/personal-finance/llg9wrz0o6",
+          publisher: "Prothom Alo",
+        },
+      ],
+      entities: [],
       externalCaseStudy: null,
     },
   },

@@ -43,7 +43,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     ``,
     `Canonical page: ${pageUrl}`,
     `Author: ${profile.name}, ${profile.title} (${SITE_URL})`,
-    study.client ? `Client: ${study.client}` : `Client: in-house product at ${profile.employer}`,
+    study.client
+      ? `Client: ${study.client}`
+      : project.category === "personal"
+        ? `Client: none — personal product by ${profile.name}`
+        : `Client: in-house product at ${profile.employer}`,
     `Timeline: ${study.year}`,
     `Role: ${study.role}`,
     `Published: ${study.publishedDate} · Updated: ${study.updatedDate}`,
